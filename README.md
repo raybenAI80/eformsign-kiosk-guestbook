@@ -262,9 +262,16 @@ CDP_PORT=9233 node tools/probe-idle-reset.mjs   # ALL_PASS=true / exit 0
 
 | 항목 | 값 |
 |---|---|
+| 라이브 URL | **https://eformsign-kiosk-guestbook.vercel.app** |
 | 저장소 | https://github.com/raybenAI80/eformsign-kiosk-guestbook (public) |
 | 호스팅 | Vercel 정적 배포 (`vercel.json`, 빌드 없음) |
-| 라이브 URL | ⏳ Vercel 연결 대기 (아래 "최초 Vercel 연결" 참고) |
+| Vercel 스코프 | `raybens-projects` (개인 스코프. 영업 도구들과 같은 곳) |
+| Vercel 프로젝트 | `eformsign-kiosk-guestbook` |
+| Git 자동 배포 | **연결됨.** `main` 에 push 하면 Vercel 이 다시 배포한다 |
+
+최초 배포 검증(2026-09-11, 768×1024): 작성 프레임 정상 로드 · 방문 일시 자동 입력 확인 ·
+콘솔 에러 0 · `?mode=immediate&debug=1` 로 모드 덮어쓰기 반영 확인.
+증거는 `evidence/final/vercel-01-loaded.png`, `evidence/final/vercel-02-immediate-debug.png`.
 
 ### 재배포
 
@@ -273,6 +280,8 @@ CDP_PORT=9233 node tools/probe-idle-reset.mjs   # ALL_PASS=true / exit 0
 ```bash
 git add -A && git commit -m "<변경 요약>" && git push
 ```
+
+CLI 로 즉시 올리려면 이 폴더에서 `vercel --prod --yes` 를 쓴다.
 
 ### 설정을 바꿀 때
 
@@ -283,21 +292,25 @@ git add -A && git commit -m "<변경 요약>" && git push
 현장에서 한 대만 다르게 쓰고 싶으면 파일을 고치지 말고 URL 쿼리로 덮어쓴다.
 
 ```
-https://<배포주소>/?mode=immediate
-https://<배포주소>/?mode=thanks&sec=4&idle=30
+https://eformsign-kiosk-guestbook.vercel.app/?mode=immediate
+https://eformsign-kiosk-guestbook.vercel.app/?mode=thanks&sec=4&idle=30
 ```
 
-### 최초 Vercel 연결 (아직 안 된 상태)
+`?debug=1` 을 붙이면 화면 우하단에 동작 로그 패널이 뜬다(현장 점검용).
 
-1. `vercel login` — 계정은 반드시 **rayben@forcs.com**(개인 gmail 아님).
-2. 이 폴더에서 `vercel link` → 프로젝트 이름 `eformsign-kiosk-guestbook`.
-3. `vercel --prod --yes` 로 최초 배포.
-4. Vercel 대시보드 Project → Settings → Git 에서 `raybenAI80/eformsign-kiosk-guestbook`
-   연결(이후 push 자동 배포).
-5. 위 표의 "라이브 URL" 을 실제 주소로 바꾼다.
+### 배포 환경 주의
 
-> 함정: git 연결 직후 첫 배포가 "Deploying outputs" 에서 몇 분 멈추는 경우가 있다
-> (Hobby 티어 일시 현상). 배포 상세에서 **Cancel → Redeploy** 하면 풀린다.
+- **Vercel 계정은 rayben@forcs.com** 이다(개인 gmail 아님). 커밋 작성자도 저장소 로컬
+  설정으로 `rayben@forcs.com` 을 쓴다 — 전역 git identity 는 개인 gmail 이라 그대로 두면
+  전역 pre-push 게이트에 걸린다.
+- `vercel link` 가 GitHub 저장소를 **자동으로 연결**한다(같은 이름의 원격이 있을 때).
+  대시보드에서 따로 Git 연결을 할 필요가 없었다.
+- `vercel link` 는 `.env.local` 을 만들고 `.gitignore` 에 `.vercel` / `.env*` 를 덧붙인다.
+  둘 다 저장소에 올리지 않는다.
+- vercel CLI 를 `npm i vercel` 로 설치하면 상위 디렉터리(`C:\Users\FORCS\package.json`)에
+  의존성이 딸려 들어갈 수 있다. 전역 설치(`npm i -g vercel`)를 쓴다.
+- 첫 배포가 "Deploying outputs" 에서 몇 분 멈추면 배포 상세에서 **Cancel → Redeploy** 한다
+  (Hobby 티어 일시 현상). 2026-09-11 최초 배포에서는 3초에 끝나 겪지 않았다.
 
 ### 배포에 포함하지 않는 것
 
