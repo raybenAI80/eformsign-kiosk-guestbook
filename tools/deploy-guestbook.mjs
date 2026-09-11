@@ -32,7 +32,7 @@ if (!FORM) {
     name: NAME, abbreviation: NAME, category: '키오스크',
     description: '방명록 키오스크용. URL로 문서 생성 허용 ON, reCAPTCHA ON.',
     memberId: member,
-    file: { filename: 'guestbook.ozr', data: readFileSync(OZR) },
+    file: { filename: OZR.split(/[\/]/).pop(), data: readFileSync(OZR) },
   });
   FORM = created?.result?.form?.form_id || created?.result?.form?.id || created?.result?.form_id
     || created?.result?.id || created?.form_id || created?.id

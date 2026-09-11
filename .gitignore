@@ -17,3 +17,11 @@ node_modules/
 # Vercel
 .vercel/
 .env*
+
+# 서식 방출본
+form/*.ozw
+
+# 게이트/리포트 산출물
+reports/
+.gates/
+qr/
