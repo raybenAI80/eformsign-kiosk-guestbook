@@ -201,7 +201,15 @@ node D:/pjt/eformsign/form-factory/scripts/config-health.mjs   --form <새 id> -
 - [ ] 필수 항목이 write 단계 `input_control_option` 에서 `required: true`
 - [ ] `config.js` 의 `templateId` / `companyId` 가 그 템플릿을 가리킨다
 
-한 줄 점검:
+한 줄 점검(키오스크 조건 전용 — 결함이면 exit 1):
+```bash
+node D:/pjt/eformsign/eformsign-cli/dist/cli.js kiosk verify-template <formId>
+```
+워크플로·URL 생성 허용·`config.notification`·`display_settings`·`is_release` 를 판정하고,
+문서 관리자 지정과 문서 제목 규칙은 경고·정보로 알려 준다. 같은 판정을 SDK
+`templates.verifyKioskTemplateReadiness(formId)` / MCP `eformsign_verify_kiosk_template` 로도 부를 수 있다.
+
+전수 정밀 점검(산출물 OZR 을 기준선으로 쓴다):
 ```bash
 node D:/pjt/eformsign/form-factory/scripts/config-health.mjs   --form <id> --ozr form/guestbook.ozr --expect form/config-health.expect.json
 ```
@@ -237,9 +245,10 @@ node D:/pjt/eformsign/form-factory/scripts/config-health.mjs   --form <id> --ozr
 🔴 이 문서는 한때 「`02`=회사 전체 문서 / `04`=템플릿별 문서」라고 적고 있었으나 **틀렸다.**
 `02` 는 개인의 처리할 문서함이다. 출처는 API 가이드의 Box type 표이고, 실기로도 재확인했다.
 
-🔴 `tools/list-docs.mjs` 는 SDK 에 `pageSize`/`page` 를 넘기는데 SDK 가 받는 이름은 `limit`/`skip` 이라
-**항상 첫 20건만 조회한다**(`수신 20건` 이 그 증상). 문서가 20건을 넘는 판정에는 쓰지 말고
-`.work/scan-types.mjs` 처럼 `limit`/`skip` 을 직접 쓴다.
+🔴 SDK `documents.list` 가 읽는 페이징 인자는 `limit`/`skip` 뿐이다. `pageSize`/`page` 로 넘기면
+**조용히 무시되고 첫 20건만** 돌아온다(`수신 20건` 이 그 증상). `tools/list-docs.mjs` 가 이 버그를
+갖고 있었고 2026-09-11 고쳤다 — 이제 `limit`/`skip` 을 쓰고 `--all` 로 전수 조회한다
+(`--type 03 --all` 이 152건을 돌려주어 별도 전수 스캔 결과와 일치).
 
 ### 완료 알림 메일은 현재 아무에게도 가지 않는다
 
@@ -251,6 +260,14 @@ node D:/pjt/eformsign/form-factory/scripts/config-health.mjs   --form <id> --ozr
 
 담당자에게 개인 문서함/메일로 보이게 만드는 선택지와 각각의 근거·부작용은
 `evidence/final/inbox-classification-check.md` §5 에 정리해 두었다(적용은 사용자 결정).
+
+## 절차·사실 정본 (이 저장소 밖)
+
+| 축 | 위치 |
+|---|---|
+| 절차(스킬) | `C:\\Users\\FORCS\\.claude\\skills\\eformsign-kiosk\\SKILL.md` — 요건 판별·체크리스트·검증 절차·함정 15종 |
+| 사실(볼트 팩) | `eformsign-api-support-pack/claims.md` 「2026-09-11 키오스크 반복 작성 조사」 절 |
+| 기계 게이트 | 라우터 규칙 `R16-eformsign-kiosk` (`kiosk-template-readiness` · `kiosk-repeat-loop` · `korean-linebreak` · `closeout-three-axis`) |
 
 ## 검증 도구 (`tools/`)
 
@@ -265,7 +282,7 @@ node D:/pjt/eformsign/form-factory/scripts/config-health.mjs   --form <id> --ozr
 | `repair-config.mjs` | 템플릿 config 의 `notification`/`display_settings` 를 기본값으로 채우고 재배포(제약 1 수리) |
 | `survey-templates.mjs` | 전 템플릿의 워크플로 단계·「URL로 문서 생성 허용」 일람 |
 | `dump-form.mjs` | 템플릿 config 전문을 JSON 으로 덤프(설정 diff 용) |
-| `list-docs.mjs` | 템플릿별 생성 문서 확인(`type:"04"`) |
+| `list-docs.mjs` | 템플릿별 생성 문서 확인(`type:"04"`). `--type 01/02/03/04` · `--limit` · `--all`(전수) |
 | `deploy-guestbook.mjs` | `form/guestbook.ozr` → 새 템플릿 배포 + 키오스크 조건(2단계·notification·필수·URL 허용·reCAPTCHA) 일괄 세팅 + release |
 | `probe-date.mjs` | 새 작성 화면에서 방문 일시가 오늘로 자동 입력되는지 캡처 |
 | `probe-components.mjs` | 달력 팝업·텍스트·라디오·체크 어포던스를 순서대로 캡처 |
