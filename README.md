@@ -43,10 +43,11 @@ OZR 복사 재배포(`redeployOzr`) 로 API 에서 만든 템플릿은 `notifica
 - API(kr-service): `form.auth.external_users.use_external_users = true` 로 저장 후 재배포
   (`tools/set-recaptcha.mjs --form <id> --on --ext on`)
 
-### 3. reCAPTCHA 는 **켜 둔다**
+### 3. reCAPTCHA — 현재 운영본은 **끔**(사용자 결정)
 「로봇에 의한 문서 자동 제출 방지」를 끄면 공개 URL 이 새어 나갔을 때 봇이 문서를 대량 생성해
-**문서 요금이 그대로 청구된다.** 켜 두면 전송 확인 팝업에 "로봇이 아닙니다" 체크가 하나 붙는다
-(방문자가 한 번 더 탭한다).
+**문서 요금이 그대로 청구된다.** 켜 두면 전송 확인 팝업에 "로봇이 아닙니다" 체크가 하나 붙어
+방문자가 한 번 더 탭한다 — 키오스크 체감을 위해 **사용자가 의도적으로 껐다**(v2·v3 모두 OFF).
+이 항목은 게이트가 판정하지 않는다(운영 판단). 유출 위험은 문서 생성 수 제한·도메인/IP 지정으로 막는다.
 
 ### 4. 인증서 기반 전자서명은 함께 쓸 수 없다
 「URL로 문서 생성 허용」과 병용 불가(제품 제약, 매뉴얼 chapter5).
@@ -154,8 +155,16 @@ ReferenceError 로 메시지 처리가 통째로 죽는다. `index.html` 에 정
 
 ## 서식(템플릿) — 항목별 컴포넌트
 
-운영 템플릿 `e1fef806750248d5993c2ecee84e9502` "방문자 기록부(방명록) v2".
-OZR 소스는 `form/`(좌표 단일 진실원천 `layout.mjs` → `build-pdf.mjs` → `build-ozr.mjs`)이다.
+운영 템플릿 `e86be31eb2e3485184b94d3d58540095` **「방문자 기록부(방명록) v3 OZW」**(2026-09-11 전환).
+서식은 **OZW**라서 다른 작업자가 **콘솔 웹폼 디자이너에서 열어 필드를 옮기고 추가**할 수 있다.
+
+소스는 `form/`(좌표 단일 진실원천 `layout.mjs` → `build-pdf.mjs` → `build-ozr.mjs` → `build-ozw.mjs`)이다.
+`build-ozw.mjs` 는 SDK `buildOzwFromPdfBacked(...)` 를 부르는 얇은 스크립트다 — OZR 봉투 뒤에
+`ozw1` 편집기 tail 을 붙여 `.ozw` 를 방출한다(API 키만 필요, 콘솔 로그인 불필요).
+
+구 운영본 `e1fef806750248d5993c2ecee84e9502` 는 **「방문자 기록부(방명록) v2 OZR 구본」** 으로
+개명해 롤백본으로 남겼다(삭제하지 않았고, 재release 해 두어 그대로 되돌릴 수 있다).
+그쪽은 PDF-backed **OZR** 이라 웹폼 디자이너에서 열어 고칠 수 없다.
 
 | 항목 | 컴포넌트 | 스키마 `input_type` | 비고 |
 |---|---|---|---|
@@ -168,6 +177,11 @@ OZR 소스는 `form/`(좌표 단일 진실원천 `layout.mjs` → `build-pdf.mjs
 | 개인정보 수집·이용 동의 | 체크박스 | `InputRadioGroup` | 값 `Y`/`N` |
 | 방문자 서명 | 서명 패드 | `SignPad` | 「서명」 모달(그리기/모바일) |
 
+🔵 **OZW 로 방출해도 이 스크립트는 그대로 동작한다**(2026-09-11 실기). `ozw1` tail 은 OZR 봉투
+**뒤에** 붙을 뿐이라 이벤트 스크립트가 손상되지 않는다 — v3 OZW 로 제출한 문서
+`018742556f094c0cb1e9ee3b8cdcffee` 의 완료 PDF 에 오늘 날짜가 인쇄됐고 문서 제목의
+`{{방문일시}}` 도 `2026-09-11` 로 치환됐다.
+
 🔴 **날짜 기본값은 플랫폼 설정이 아니라 OZR 스크립트다.** 템플릿 설정에는 기본값 항목 자체가 없다.
 DateTimePicker 의 `OnInitialize` 가 `if (This.GetText() == "") { This.SetDateTime(new Date().getTime()); }` 를 돈다
 (SDK `buildPdfBackedOzr` 의 `field.todayDefault: true`). 값이 이미 있는 문서는 덮어쓰지 않는다.
@@ -178,13 +192,30 @@ DateTimePicker 의 `OnInitialize` 가 `if (This.GetText() == "") { This.SetDateT
 
 ### 서식을 고칠 때
 
-양식 파일만 바꾸는 API 는 없다(`POST /forms/{fid}` multipart 는 `ozr_id` 만 회전하고 바이트는 그대로). **새 템플릿을 만든다.**
+고치는 길은 두 갈래다.
+
+**(가) 웹폼 디자이너에서 직접** — 필드를 옮기거나 하나 더 놓는 정도면 콘솔에서 템플릿을 열어
+고치고 저장·재배포하면 끝이다. **OZW 로 전환한 이유가 이것이다.**
+
+**(나) 소스에서 재방출** — 좌표·문구·PDF 배경 자체가 바뀌면 빌드 체인을 다시 돌린다.
+양식 파일만 바꾸는 API 는 없으므로(`POST /forms/{fid}` multipart 는 `ozr_id` 만 회전하고 바이트는
+그대로) **새 템플릿을 만든다.**
 
 ```bash
-node form/build-pdf.mjs && node form/build-ozr.mjs          # 좌표 수정 후
-node --env-file=D:/pjt/eformsign/eformsign-core/.env   tools/deploy-guestbook.mjs --name "방문자 기록부(방명록) v3" --recaptcha on
-node D:/pjt/eformsign/form-factory/scripts/config-health.mjs   --form <새 id> --ozr form/guestbook.ozr --expect form/config-health.expect.json
+node form/build-pdf.mjs && node form/build-ozr.mjs && node form/build-ozw.mjs   # 좌표 수정 후
+node --env-file=D:/pjt/eformsign/eformsign-core/.env   tools/deploy-guestbook.mjs --name "방문자 기록부(방명록) v4 OZW" --ozr form/guestbook.ozw --recaptcha off
+node --env-file=D:/pjt/eformsign/eformsign-core/.env   D:/pjt/eformsign/eformsign-cli/dist/cli.js kiosk verify-template <새 id>
+node --env-file=D:/pjt/eformsign/eformsign-core/.env   D:/pjt/eformsign/form-factory/scripts/config-health.mjs --form <새 id> --ozr form/guestbook.ozr --expect form/config-health.expect.json
 ```
+
+`build-ozw.mjs` 대신 SDK 를 직접 부를 수도 있다(같은 구현, 4표면).
+
+```bash
+node D:/pjt/eformsign/eformsign-cli/dist/cli.js ozw build-from-pdf form/guestbook.ozr -o form/guestbook.ozw   --required 방문일시 --required 방문자성명 --required 소속 --required 연락처   --required 방문목적 --required 담당자 --required 개인정보동의
+```
+
+같은 입력이면 산출 바이트가 항상 같다(고정점 sha256 `9346a5cb5577f350…`) — 재방출본이 배포본과
+byte-identical 인지로 회귀를 잡는다.
 그리고 `config.js` 의 `templateId` 를 갱신한다. 구본은 **삭제하지 말고 개명**해 둔다.
 ⚠️ `createFromFile` 은 같은 이름이면 `400 [4000048] The connection name already exists` 로 거부한다.
 ⚠️ 이름만 바꿔 저장해도 `is_release` 가 내려가므로, 운영본을 개명했으면 재배포한다.
@@ -196,7 +227,7 @@ node D:/pjt/eformsign/form-factory/scripts/config-health.mjs   --form <새 id> -
 - [ ] **URL로 문서 생성 허용 ON** — 꺼져 있으면 OZR 로딩이 403 (제약 2)
 - [ ] **`config.notification` 이 비어 있지 않다** — 비면 제출이 400 (제약 1). `config-health.mjs` exit 0 으로 확인
 - [ ] **release 된 상태**(`is_release: true`)
-- [ ] **reCAPTCHA ON** — 공개 URL 이 새면 봇이 문서를 대량 생성한다 (제약 3)
+- [ ] **reCAPTCHA** — 현재 운영본은 사용자 결정으로 OFF. 켜고 끄는 판단 근거는 제약 3
 - [ ] 워크플로 **시작(방문자) → 완료** 2단계로 충분하다. 담당자 확인이 필요하면 3단계
 - [ ] 필수 항목이 write 단계 `input_control_option` 에서 `required: true`
 - [ ] `config.js` 의 `templateId` / `companyId` 가 그 템플릿을 가리킨다
@@ -261,6 +292,22 @@ node D:/pjt/eformsign/form-factory/scripts/config-health.mjs   --form <id> --ozr
 담당자에게 개인 문서함/메일로 보이게 만드는 선택지와 각각의 근거·부작용은
 `evidence/final/inbox-classification-check.md` §5 에 정리해 두었다(적용은 사용자 결정).
 
+## 서식을 OZW 로 만드는 이유와 방법 (재사용 가능한 지식)
+
+🔴 **API 로 서식을 만들 때의 기본 산출물은 `.ozw` 다.** "콘솔 로그인이 없으면 웹폼 디자이너용
+OZW 를 못 만든다"는 2026-09-11 에 반증된 오판이다 — OZW 는 **PDF-backed OZR 봉투 그대로 +
+`"ozw1"` + u32(tail 길이) + tail(UTF-8·CRLF)** 이고, 그 tail 을 우리가 직접 방출하면 된다.
+전말과 경로 비교표: `D:\pjt\eformsign\docsesearch\ozw-template-api-creation-feasibility-2026-09-11.md`.
+
+방출 로직은 SDK 한 곳에 있고 나머지는 얇은 어댑터다.
+
+| 표면 | 호출 |
+|---|---|
+| SDK | `buildOzwFromPdfBacked({ ozrBuffer, requiredFieldIds?, participantMask? })` / `client.ozw.buildFromPdfBacked(...)` |
+| CLI | `eformsign-cli ozw build-from-pdf <ozr> -o <out.ozw> [--required <FORMID>…]` |
+| MCP | `eformsign_build_ozw_from_pdf` |
+| HTTP | `POST /v1/ozw/build-from-pdf` (`eformsign-api`, `X-API-Key`) |
+
 ## 절차·사실 정본 (이 저장소 밖)
 
 | 축 | 위치 |
@@ -284,6 +331,9 @@ node D:/pjt/eformsign/form-factory/scripts/config-health.mjs   --form <id> --ozr
 | `dump-form.mjs` | 템플릿 config 전문을 JSON 으로 덤프(설정 diff 용) |
 | `list-docs.mjs` | 템플릿별 생성 문서 확인(`type:"04"`). `--type 01/02/03/04` · `--limit` · `--all`(전수) |
 | `deploy-guestbook.mjs` | `form/guestbook.ozr` → 새 템플릿 배포 + 키오스크 조건(2단계·notification·필수·URL 허용·reCAPTCHA) 일괄 세팅 + release |
+| `promote-template.mjs` | 시험 템플릿을 운영본으로 승격(이름·설명·제목 규칙 적용 + 기준 템플릿 설정 복사 + **release 재요청**) |
+| `fetch-pdf.mjs` | 완료 문서 PDF 다운로드(렌더 검증용) |
+| `probe-full-submit.mjs` | 전 항목(날짜·텍스트·라디오·체크·서명)을 채워 1건 제출 — 완료 PDF 렌더 증거용 |
 | `probe-date.mjs` | 새 작성 화면에서 방문 일시가 오늘로 자동 입력되는지 캡처 |
 | `probe-components.mjs` | 달력 팝업·텍스트·라디오·체크 어포던스를 순서대로 캡처 |
 | `probe-sign-send.mjs` / `probe-sign2.mjs` | 서명 패드 열기 → 그리기 → 확인 → 전송 |

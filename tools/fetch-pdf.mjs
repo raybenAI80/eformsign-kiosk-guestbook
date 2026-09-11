@@ -1,0 +1,11 @@
+import fs from 'node:fs';
+import { createRequire } from 'node:module';
+const require = createRequire(import.meta.url);
+const { EformsignClient } = require('D:/pjt/eformsign/eformsign-core/dist/src/index.js');
+const docId = process.argv[2];
+const out = process.argv[3];
+const client = new EformsignClient({ apiKey: process.env.EFORMSIGN_API_KEY, privateKey: process.env.EFORMSIGN_PRIVATE_KEY });
+const r = await client.documents.downloadFiles(docId, { memberId: process.env.EFORMSIGN_DEFAULT_MEMBER_ID });
+const buf = r?.buffer || r?.data || r;
+fs.writeFileSync(out, Buffer.isBuffer(buf) ? buf : Buffer.from(buf));
+console.log('wrote', out, fs.statSync(out).size, 'bytes');
