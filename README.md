@@ -257,3 +257,51 @@ CDP_PORT=9233 node tools/probe-idle-reset.mjs   # ALL_PASS=true / exit 0
 ```
 
 좌표는 768×1024 태블릿 뷰포트 기준이라 템플릿이 바뀌면 다시 잡아야 한다.
+
+## 배포
+
+| 항목 | 값 |
+|---|---|
+| 저장소 | https://github.com/raybenAI80/eformsign-kiosk-guestbook (public) |
+| 호스팅 | Vercel 정적 배포 (`vercel.json`, 빌드 없음) |
+| 라이브 URL | ⏳ Vercel 연결 대기 (아래 "최초 Vercel 연결" 참고) |
+
+### 재배포
+
+`main` 에 push 하면 Vercel 이 자동으로 다시 배포한다.
+
+```bash
+git add -A && git commit -m "<변경 요약>" && git push
+```
+
+### 설정을 바꿀 때
+
+키오스크 동작(모드·감사 화면 시간·무응답 리셋·템플릿 ID 등)은 `config.js` **한 파일**만
+고치면 된다. 고친 뒤 위와 같이 push 하면 반영된다. `vercel.json` 이 `config.js` 와
+`index.html` 에 `Cache-Control: no-store` 를 걸어 두어 태블릿이 옛 설정을 물고 있지 않는다.
+
+현장에서 한 대만 다르게 쓰고 싶으면 파일을 고치지 말고 URL 쿼리로 덮어쓴다.
+
+```
+https://<배포주소>/?mode=immediate
+https://<배포주소>/?mode=thanks&sec=4&idle=30
+```
+
+### 최초 Vercel 연결 (아직 안 된 상태)
+
+1. `vercel login` — 계정은 반드시 **rayben@forcs.com**(개인 gmail 아님).
+2. 이 폴더에서 `vercel link` → 프로젝트 이름 `eformsign-kiosk-guestbook`.
+3. `vercel --prod --yes` 로 최초 배포.
+4. Vercel 대시보드 Project → Settings → Git 에서 `raybenAI80/eformsign-kiosk-guestbook`
+   연결(이후 push 자동 배포).
+5. 위 표의 "라이브 URL" 을 실제 주소로 바꾼다.
+
+> 함정: git 연결 직후 첫 배포가 "Deploying outputs" 에서 몇 분 멈추는 경우가 있다
+> (Hobby 티어 일시 현상). 배포 상세에서 **Cancel → Redeploy** 하면 풀린다.
+
+### 배포에 포함하지 않는 것
+
+`.gitignore` 로 `evidence/`(검증 스크린샷), `.work/`, `form/` 의 PDF·OZR·XML 산출물을
+제외한다. 저장소에는 소스(`index.html`, `config.js`), 서식 빌드 스크립트(`form/*.mjs`),
+검증 도구(`tools/`)만 올라간다. 자격 증명은 전부 환경 변수(`process.env.*`)로만 읽으므로
+저장소에 들어 있는 하드코딩된 키는 없다.
