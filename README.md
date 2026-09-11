@@ -4,7 +4,7 @@
 사람이 손대지 않아도 **같은 템플릿의 새 작성 화면**이 다시 열린다.
 
 - (A) `mode: "immediate"` — 제출 즉시 새 작성 화면
-- (B) `mode: "thanks"` — "감사합니다" 안내를 N초(기본 10초) 보여 준 뒤 새 작성 화면
+- (B) `mode: "thanks"` — "감사합니다" 안내를 N초(기본 5초) 보여 준 뒤 새 작성 화면
 
 OZR 은 쓰지 않는다. 이폼사인 **표준 기능 + 정적 HTML 한 장**이다.
 
@@ -114,7 +114,7 @@ python -m http.server 8099 --bind 127.0.0.1
 | `hideRequestPopup` | 전송 확인 팝업 숨김 시도(현재 효과 없음, 제약 5) |
 | `debug` | 우하단 로그 패널 |
 
-URL 쿼리로 덮어쓸 수 있다: `?mode=thanks&sec=10&idle=120&abandon=180&template=<id>&company=<id>&debug=1`
+URL 쿼리로 덮어쓸 수 있다: `?mode=thanks&sec=5&idle=120&abandon=180&template=<id>&company=<id>&debug=1`
 
 ## 태블릿 키오스크 모드
 

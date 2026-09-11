@@ -22,7 +22,7 @@ window.KIOSK_CONFIG = {
   mode: 'thanks',
 
   // mode:'thanks' 일 때 감사 화면을 보여 줄 시간(초)
-  thanksSeconds: 10,
+  thanksSeconds: 5,
   thanksMessage: '작성해 주셔서 감사합니다.',
   thanksSubMessage: '잠시 후 처음 화면으로 돌아갑니다.',
 
