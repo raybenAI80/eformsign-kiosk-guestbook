@@ -162,7 +162,8 @@ ReferenceError 로 메시지 처리가 통째로 죽는다. `index.html` 에 정
 🔴 **v3~v5 는 디자이너에서 빈 캔버스로 열렸다**(서버·작성·제출은 전부 정상이라 조용했다). 원인 3종:
 ① tail 라디오 구분자 VT(U+000B) = XML 1.0 불법문자 ② `OZPAGE/@PDFDOC_NAME` 이 섹션명(리터럴 `PDFDocument` 여야 함)
 ③ 🔴 `ozw1` 앞 **12바이트 리소스 컨테이너 헤더** `0D 0A 00 00 03 E9 00 00 00 01 00 04` 누락.
-셋 다 `eformsign-core` 방출·검증 게이트로 막았다. 전말 = `D:\pjt\eformsign\docsesearch\ozw-designer-open-failure-2026-09-15.md`.
+셋 다 `eformsign-core` 방출·검증 게이트로 막았다. 전말 = `D:\pjt\eformsign\docs
+esearch\ozw-designer-open-failure-2026-09-15.md`.
 구본은 삭제하지 않고 `v3 OZW 구본(VT 결함)` / `v4·v5 중간본` 으로 개명해 남겼다.
 
 소스는 `form/`(좌표 단일 진실원천 `layout.mjs` → `build-pdf.mjs` → `build-ozr.mjs` → `build-ozw.mjs`)이다.
@@ -185,15 +186,15 @@ ReferenceError 로 메시지 처리가 통째로 죽는다. `index.html` 에 정
 | 방문자 서명 | 서명 패드 | `SignPad` | 「서명」 모달(그리기/모바일) |
 
 🔵 **OZW 로 방출해도 이 스크립트는 그대로 동작한다**(2026-09-11 실기). `ozw1` tail 은 OZR 봉투
-**뒤에** 붙을 뿐이라 이벤트 스크립트가 손상되지 않는다 — v3 OZW 로 제출한 문서
-`018742556f094c0cb1e9ee3b8cdcffee` 의 완료 PDF 에 오늘 날짜가 인쇄됐다.
+**뒤에** 붙을 뿐이라 이벤트 스크립트가 손상되지 않는다 — v3 OZW 로 제출한 검증 문서의 완료 PDF 에
+오늘 날짜가 인쇄됐다(그 문서는 2026-09-15 정리 때 삭제했다. 근거는 `evidence/final/cleanup-2026-09-15.md`).
 
 🔴 **문서 제목 규칙(현행)** — `$$current_datetime$$_방문자 기록부(방명록)__{{방문자성명}}__{{소속}}`.
 제목 앞머리는 필드 `{{방문일시}}` 가 아니라 **플랫폼 변수 `$$current_datetime$$`**(생성 시각, `2026-09-15 오전 09:07`)
 를 쓴다 — 사용자가 콘솔에서 정한 값이며 구본 `e1fef806750248d5993c2ecee84e9502` 와 동일하다.
-2026-09-15 운영본 v3 에 되돌려 반영했고, 실기 제출 문서
-`e721fef8a9714871b832107fc5a41f68` 의 제목이 `2026-09-15 오전 09:07_방문자 기록부(방명록)__제목복원테스트__포시에스`
-로 생성되는 것을 확인했다.
+2026-09-15 운영본 v3 에 되돌려 반영했고, 실기 제출 문서의 제목이
+`2026-09-15 오전 09:07_방문자 기록부(방명록)__제목복원테스트__포시에스` 로 생성되는 것을 확인했다
+(그 검증 문서도 2026-09-15 정리 때 삭제했다).
 
 🔴 **날짜 기본값은 플랫폼 설정이 아니라 OZR 스크립트다.** 템플릿 설정에는 기본값 항목 자체가 없다.
 DateTimePicker 의 `OnInitialize` 가 `if (This.GetText() == "") { This.SetDateTime(new Date().getTime()); }` 를 돈다
@@ -311,7 +312,8 @@ node D:/pjt/eformsign/form-factory/scripts/config-health.mjs   --form <id> --ozr
 🔴 **API 로 서식을 만들 때의 기본 산출물은 `.ozw` 다.** "콘솔 로그인이 없으면 웹폼 디자이너용
 OZW 를 못 만든다"는 2026-09-11 에 반증된 오판이다 — OZW 는 **PDF-backed OZR 봉투 그대로 +
 `"ozw1"` + u32(tail 길이) + tail(UTF-8·CRLF)** 이고, 그 tail 을 우리가 직접 방출하면 된다.
-전말과 경로 비교표: `D:\pjt\eformsign\docsesearch\ozw-template-api-creation-feasibility-2026-09-11.md`.
+전말과 경로 비교표: `D:\pjt\eformsign\docs
+esearch\ozw-template-api-creation-feasibility-2026-09-11.md`.
 
 방출 로직은 SDK 한 곳에 있고 나머지는 얇은 어댑터다.
 
@@ -431,3 +433,16 @@ https://eformsign-kiosk-guestbook.vercel.app/?mode=thanks&sec=4&idle=30
 제외한다. 저장소에는 소스(`index.html`, `config.js`), 서식 빌드 스크립트(`form/*.mjs`),
 검증 도구(`tools/`)만 올라간다. 자격 증명은 전부 환경 변수(`process.env.*`)로만 읽으므로
 저장소에 들어 있는 하드코딩된 키는 없다.
+
+## 계정 정리 이력 (2026-09-15)
+
+키오스크 제작 과정에서 만든 구본·중간본 템플릿과 검증 문서를 사용자 승인으로 정리했다.
+**운영 템플릿 v6 `31de7ab146d14f2bb923d7a94d7122e5` 와 실제 방문자 제출 문서는 그대로 두었다.**
+
+- 삭제: 문서 33건 · 템플릿 6건(`380345bf`·`1ded2177`·`0c05c014`·`766a92a3`·`8a245fe9`·`9fb26e09`)
+- 보류: 테스트 서명으로 단정할 수 없는 문서 6건과 그 소속 템플릿 2건(`e1fef806` v2 구본 · `e86be31e` v3 구본)
+- 전수 목록·판정 근거·삭제 후 재조회 결과: `evidence/final/cleanup-2026-09-15.md`
+  (`evidence/` 는 `.gitignore` 대상이라 이 파일 하나만 예외로 커밋해 감사 흔적을 남긴다)
+
+🔴 `templates.delete` 는 500 을 돌려주고도 실제로는 삭제된 경우가 있다. 삭제 판정은
+**삭제 후 fresh 재조회**로만 한다(이번에는 템플릿 목록 171 → 165, 대상 6종 잔존 0건으로 확인).

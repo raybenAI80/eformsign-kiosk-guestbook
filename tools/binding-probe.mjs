@@ -16,9 +16,10 @@ const { EformsignClient } = require('D:/pjt/eformsign/eformsign-core/dist/src/in
 const arg = (n, d) => { const i = process.argv.indexOf('--' + n); return i > -1 ? process.argv[i + 1] : d; };
 const flag = (n) => process.argv.includes('--' + n);
 
-/** 실제 방문 기록이 쌓이는 운영 템플릿. 여기에는 검증 문서를 만들지 않는다. */
+/** 실제 방문 기록이 쌓이는 템플릿. 여기에는 검증 문서를 만들지 않는다. */
 const PROTECTED_FORMS = new Set([
-  'e1fef806750248d5993c2ecee84e9502', // 방문자 기록부(방명록) v2 — 키오스크 운영본
+  '31de7ab146d14f2bb923d7a94d7122e5', // 방문자 기록부(방명록) v6 OZW — 현행 키오스크 운영본
+  'e1fef806750248d5993c2ecee84e9502', // 방문자 기록부(방명록) v2 OZR 구본 — 실제 방문 기록이 남아 있는 롤백본
 ]);
 
 const FORM = arg('form'); const OUT = arg('out', 'D:/pjt/eformsign/kiosk-guestbook/evidence/final');
