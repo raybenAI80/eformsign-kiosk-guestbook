@@ -8,7 +8,7 @@
  */
 import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
-const { EformsignClient, toCreateShapeAuth } = require('D:/pjt/eformsign/eformsign-core/dist/src/index.js');
+const { EformsignClient, toCreateShapeAuthFromForm } = require('D:/pjt/eformsign/eformsign-core/dist/src/index.js');
 
 const arg = (n, d) => { const i = process.argv.indexOf('--' + n); return i > -1 ? process.argv[i + 1] : d; };
 const SOURCE = arg('source', 'f7542d23f2e141228ce14604e1874747');
@@ -52,7 +52,7 @@ console.log('new form', re.newFormId, 'copied', re.copiedConfigKeys, re.configWa
 
 // 3) 「URL로 문서 생성 허용」 ON + reCAPTCHA ON
 const nf = await getForm(re.newFormId);
-nf.auth = toCreateShapeAuth(nf.auth);
+nf.auth = toCreateShapeAuthFromForm(nf);
 nf.auth.external_users.use_external_users = true;
 nf.auth.external_users.use_recaptcha = true;          // 봇 대량 생성 = 요금 폭증 방지(끄지 말 것)
 nf.auth.external_users.use_external_creators_info = false;

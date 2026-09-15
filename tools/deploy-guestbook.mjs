@@ -7,7 +7,7 @@ import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
 const {
-  EformsignClient, EFORMSIGN_DEFAULT_NOTIFICATION, EFORMSIGN_SYSTEM_COLUMNS, toCreateShapeAuth,
+  EformsignClient, EFORMSIGN_DEFAULT_NOTIFICATION, EFORMSIGN_SYSTEM_COLUMNS, toCreateShapeAuthFromForm,
 } = require('D:/pjt/eformsign/eformsign-core/dist/src/index.js');
 
 const arg = (n, d) => { const i = process.argv.indexOf('--' + n); return i > -1 ? process.argv[i + 1] : d; };
@@ -46,7 +46,7 @@ if (!FORM) {
 }
 
 const f = await getForm(FORM);
-f.auth = toCreateShapeAuth(f.auth);
+f.auth = toCreateShapeAuthFromForm(f);
 f.config.notification = JSON.parse(JSON.stringify(EFORMSIGN_DEFAULT_NOTIFICATION));
 
 const controls = f.config.parameters?.default_input_controls || [];

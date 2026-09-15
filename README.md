@@ -155,7 +155,8 @@ ReferenceError 로 메시지 처리가 통째로 죽는다. `index.html` 에 정
 
 ## 서식(템플릿) — 항목별 컴포넌트
 
-운영 템플릿 `bf35f6c28c7945a48a9668fb00711466` **「방문자 기록부(방명록) v8 OZW(디자인 배경)」**(2026-09-15 전환).
+운영 템플릿 `8844aae609b84078a59ef3118c64dab2` **「방문자 기록부(방명록) v9 OZW」**(2026-09-16 전환).
+v8(`bf35f6c2…`)은 **라디오 그룹 tail `label` 결함**으로 구본이 되었다 — 아래 「라디오 label」 절 참조.
 
 🔴 **v8 부터 배경은 스크립트가 그리지 않는다 — 디자인 HTML 이 단일 진실 원천이다.**
 `form/design/guestbook.html` → `render-pdf.mjs` → `guestbook-design.pdf`(배경) · `extract-layout.mjs` →
@@ -211,10 +212,30 @@ v7 이전 = `layout.mjs` → `build-pdf.mjs` → `build-ozr.mjs` → `build-ozw.
 🔴 개명은 `update_date` 를 갱신해 **목록 정렬을 뒤집는다.** 운영본을 맨 위에 두려면 구본을 먼저 개명하고
 운영본을 **마지막에** 저장한다(무변경 재저장으로 `update_date` 만 올릴 수 있다 —
 `.work/resave-v6.mjs`, 전후 GET 깊은 비교로 실질 변경 0건을 확인한다).
-🔴 **그 「무변경 재저장」은 문서 관리자를 지운다**(2026-09-15 v8 에서 실측). 저장 경로가 `toCreateShapeAuth(f.auth)`
-를 쓰는데 `auth.managers` 는 **비어 있는 파생 뷰**라, 실제 저장소인 `permissionAuth.managers.members` 의
-`["rayben@forcs.com"]` 이 `[]` 로 덮인다. 재저장 뒤에는 **반드시 `.work/set-manager.mjs --shape string` 을 다시**
-돌린다(겸사겸사 그게 마지막 저장이 되어 목록 맨 위도 유지된다).
+🔴 **그 「무변경 재저장」이 문서 관리자를 지웠다**(2026-09-15 v8 실측). `auth.form_manager` 는 **비어 있는 파생 뷰**이고
+실제 저장소는 `permissionAuth.managers.members` 인데, 저장 경로가 `toCreateShapeAuth(f.auth)` 만 쓰면
+`["rayben@forcs.com"]` 이 `[]` 로 덮였다. **2026-09-16 도구 수정으로 해소** — SDK 에 `toCreateShapeAuthFromForm(form)`
+(폼 전체를 받아 `permissionAuth` 를 먼저 읽는다)을 두고 저장하는 도구 전부를 그것으로 바꿨다
+(`tools/{deploy-guestbook,promote-template,replace-form-file,repair-config,set-recaptcha,make-kiosk-template}.mjs`,
+`.work/{resave-v6,rename-tpl,set-manager,set-title}.mjs`).
+고정점 = `eformsign-core/tests/create-shape-auth-managers.test.ts`(결함 주입 포함) + v9 실기(관리자 지정 → 무변경
+재저장 → `permissionAuth.managers.members` 유지 확인). 규율(재저장 뒤 set-manager 재실행)은 더 이상 필수가 아니지만,
+**저장 순서**(구본 먼저 → 운영본 마지막) 규칙은 그대로다.
+
+### 라디오 label — 항목 수는 맞추고 글자는 비운다 (2026-09-16 실기 A/B 3판)
+
+배경 PDF 가 항목명("회의 납품 면접 견학 기타")을 이미 인쇄하는 서식에서 라디오 그룹 tail 의 `label` 을 어떻게 쓰느냐로
+웹폼 디자이너의 거동이 갈린다. `label` = 컴포넌트가 **캔버스에 직접 그리는 항목 텍스트 목록**, `text_multivalue` = 항목 데이터.
+
+| 방출 | 디자이너 | 결과 |
+|---|---|---|
+| `label="<첫 옵션>"` (v8) | 렌더 OK | 첫 항목만 **"회의회의" 이중 인쇄** |
+| `label=""` (v9 초판) | 🔴 **백지** | `mxLabel.getCheckBounds` → `TypeError: …reading 'node'` 로 `Execute_AddPage` 중단 = 배경·전 컴포넌트 미렌더 |
+| `label="빈 항목 n개"`(개행 n-1개) | 렌더 OK | 항목 텍스트 **1회만** ✅ 채택 |
+
+즉 **항목 수(`label`)와 데이터 수(`text_multivalue`)가 같아야** 한다 — 콘솔 제작본의 `label === text_multivalue` 는
+배경에 글자가 없어 스스로 그려야 하는 경우의 같은 규칙이다. 기계 게이트 = `eformsign-core/tests/ozw-radio-label.test.ts`(결함 주입 2종).
+파일은 정상인데 디자이너만 백지면 **콘솔 예외부터** 본다(공개 URL 은 멀쩡히 렌더된다 — 파일 탓으로 오판하기 쉽다).
 
 | 항목 | 컴포넌트 | 스키마 `input_type` | 비고 |
 |---|---|---|---|

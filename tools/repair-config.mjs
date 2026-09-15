@@ -3,7 +3,7 @@
  */
 import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
-const { EformsignClient, EFORMSIGN_DEFAULT_NOTIFICATION, EFORMSIGN_SYSTEM_COLUMNS, toCreateShapeAuth } = require('D:/pjt/eformsign/eformsign-core/dist/src/index.js');
+const { EformsignClient, EFORMSIGN_DEFAULT_NOTIFICATION, EFORMSIGN_SYSTEM_COLUMNS, toCreateShapeAuthFromForm } = require('D:/pjt/eformsign/eformsign-core/dist/src/index.js');
 const arg = (n, d) => { const i = process.argv.indexOf('--' + n); return i > -1 ? process.argv[i + 1] : d; };
 const has = n => process.argv.includes('--' + n);
 const FORM = arg('form');
@@ -14,7 +14,7 @@ const cid = (await http.getCompany()).id; const enc = encodeURIComponent(member)
 const getForm = async () => (await http.requestService(`/v1.0/companies/${cid}/members/${enc}/forms/${FORM}`, { method:'GET', tokenKind, query:{lang:'ko'} }))?.result?.form;
 
 const f = await getForm();
-f.auth = toCreateShapeAuth(f.auth);
+f.auth = toCreateShapeAuthFromForm(f);
 const before = { ds: (f.config.display_settings||[]).length, notif: (f.config.notification?.processing_status?.mail?.sending_points||[]).length };
 
 if (has('revert')) { f.config.notification = {}; f.config.display_settings = []; }

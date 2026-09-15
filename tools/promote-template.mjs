@@ -4,7 +4,7 @@
  */
 import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
-const { EformsignClient, toCreateShapeAuth } = require('D:/pjt/eformsign/eformsign-core/dist/src/index.js');
+const { EformsignClient, toCreateShapeAuthFromForm } = require('D:/pjt/eformsign/eformsign-core/dist/src/index.js');
 
 const arg = (n, d) => { const i = process.argv.indexOf('--' + n); return i > -1 ? process.argv[i + 1] : d; };
 const FORM = arg('form');
@@ -37,7 +37,7 @@ if (TITLE_RULE && w) { w.option.doc_default_title = TITLE_RULE; applied.push(['d
 if (f.config.title_change !== true) { f.config.title_change = true; applied.push(['config.title_change', true]); }
 else applied.push(['config.title_change', 'already true (no change)']);
 
-f.auth = toCreateShapeAuth(f.auth);
+f.auth = toCreateShapeAuthFromForm(f);
 if (ref) {
   const r = ref.auth?.form_external_user || {};
   const e = f.auth.external_users;

@@ -5,7 +5,7 @@
  */
 import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
-const { EformsignClient, toCreateShapeAuth } = require('D:/pjt/eformsign/eformsign-core/dist/src/index.js');
+const { EformsignClient, toCreateShapeAuthFromForm } = require('D:/pjt/eformsign/eformsign-core/dist/src/index.js');
 
 const arg = (n, d) => { const i = process.argv.indexOf('--' + n); return i > -1 ? process.argv[i + 1] : d; };
 const FORM = arg('form');
@@ -25,7 +25,7 @@ const getForm = async () => (await http.requestService(
 ))?.result?.form;
 
 const f = await getForm();
-f.auth = toCreateShapeAuth(f.auth);
+f.auth = toCreateShapeAuthFromForm(f);
 const extArg = (process.argv.indexOf('--ext') > -1) ? process.argv[process.argv.indexOf('--ext') + 1] : 'on';
 f.auth.external_users.use_external_users = (extArg !== 'off');
 f.auth.external_users.use_recaptcha = ON;
