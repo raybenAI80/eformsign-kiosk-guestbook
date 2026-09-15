@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>방문자 기록부</title>
+<style>
+/* ────────────────────────────────────────────────────────────────────────
+   방문자 기록부 — 배경 서식(A4 세로 1장)
+   이 HTML 은 "인쇄되는 글리프"만 담는다. 입력값이 들어갈 자리는 빈 박스/밑줄로
+   그려 두고 data-field 로 표시한다 — extract-layout.mjs 가 그 좌표를 읽어
+   layout.design.mjs(OZR 컴포넌트 좌표)를 만든다.
+   좌표 단위는 pt, 원점은 페이지 좌상단. 1pt = 1.333333px(96dpi).
+   ──────────────────────────────────────────────────────────────────────── */
+
+@page { size: A4; margin: 0; }
+
+:root {
+  --brand:      #0E73C3;   /* eformsign Blue — 유일한 메인 컬러 */
+  --brand-soft: #F2F9FF;   /* 가이드 지정 배경 Light Blue */
+  --ink:        #16202B;
+  --ink-2:      #46535F;
+  --ink-3:      #6B7884;
+  --line:       #D4DDE5;
+  --line-2:     #E8EEF3;
+  --field:      #B9C6D2;
+
+  /* 브랜드 지정 폰트만 사용한다(로컬 설치본, 외부 웹폰트 로드 없음).
+     Paperlogy 는 굵기마다 별도 패밀리로 등록되므로 패밀리명으로 고른다. */
+  --f-head: "페이퍼로지 8 ExtraBold", "Paperlogy 8 ExtraBold", "Noto Sans KR", "Malgun Gothic", sans-serif;
+  --f-semi: "페이퍼로지 6 SemiBold",  "Paperlogy 6 SemiBold",  "Noto Sans KR", "Malgun Gothic", sans-serif;
+  --f-body: "Pretendard", "Noto Sans KR", "Malgun Gothic", sans-serif;
+}
+
+/* 선언한 너비 = 바깥 상자. 오른쪽 여백이 테두리 두께만큼 밀리는 것을 막는다. */
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0; padding: 0;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+body {
+  width: 595.28pt; height: 841.89pt;
+  position: relative; overflow: hidden;
+  background: #FFFFFF;
+  font-family: var(--f-body);
+  font-size: 11pt; line-height: 1.45; color: var(--ink);
+  letter-spacing: 0;
+  /* 한국어 줄바꿈: 어절 단위 유지. anywhere 는 keep-all 을 무력화하므로 쓰지 않는다. */
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  line-break: strict;
+}
+
+/* 절대 배치 헬퍼 — 모든 좌표는 pt */
+.at { position: absolute; }
+
+/* ── 헤더 ───────────────────────────────────────────────────────────── */
+.header {
+  left: 0; top: 0; width: 595.28pt; height: 120pt;
+  background: var(--brand-soft);
+  border-bottom: 2.5pt solid var(--brand);
+}
+.logo { left: 52pt; top: 26pt; height: 19pt; }
+.title {
+  left: 52pt; top: 56pt; width: 400pt;
+  font-family: var(--f-head); font-size: 28pt; line-height: 1.15;
+  color: var(--brand); text-wrap: balance;
+}
+.subtitle {
+  left: 52pt; top: 95pt; width: 460pt;
+  font-size: 10.5pt; line-height: 1.35; color: var(--ink-2);
+  text-wrap: balance;
+}
+
+/* ── 섹션 머리 ──────────────────────────────────────────────────────── */
+.sec-bar  { width: 3.5pt; height: 13pt; background: var(--brand); border-radius: 2pt; }
+.sec-name {
+  font-family: var(--f-semi); font-size: 12.5pt; line-height: 1.1; color: var(--ink);
+}
+
+/* ── 행(라벨 + 입력칸) ──────────────────────────────────────────────── */
+.label {
+  left: 52pt; width: 96pt;
+  font-family: var(--f-semi); font-size: 11pt; line-height: 16pt; color: var(--ink-2);
+}
+.box {
+  height: 32pt;
+  border: 1pt solid var(--field); border-radius: 4pt;
+  background: #FFFFFF;
+}
+
+/* ── 라디오 ─────────────────────────────────────────────────────────── */
+.radio {
+  width: 15pt; height: 15pt;
+  border: 1.1pt solid #8A98A5; border-radius: 50%;
+  background: #FFFFFF;
+}
+.radio-label {
+  font-size: 11pt; line-height: 14pt; color: var(--ink-2);
+  white-space: nowrap;
+}
+
+/* ── 동의 카드 ──────────────────────────────────────────────────────── */
+.card {
+  left: 52pt; width: 491.28pt;
+  border: 1pt solid var(--line); border-radius: 6pt;
+  background: #FFFFFF;
+}
+.card-accent {
+  left: 52pt; width: 4pt;
+  background: var(--brand);
+  border-radius: 6pt 0 0 6pt;
+}
+.card-head {
+  left: 72pt; width: 455pt;
+  font-family: var(--f-semi); font-size: 12pt; line-height: 1.1; color: var(--ink);
+}
+.card-line {
+  left: 72pt; width: 455pt;
+  font-size: 9.8pt; line-height: 1.35; color: var(--ink-2);
+}
+.card-rule { left: 72pt; width: 455pt; border-top: 0.75pt solid var(--line-2); }
+.check {
+  width: 15pt; height: 15pt;
+  border: 1.2pt solid #55636F; border-radius: 2.5pt;
+  background: #FFFFFF;
+}
+.check-text {
+  font-family: var(--f-semi); font-size: 10.5pt; line-height: 14pt; color: var(--ink);
+}
+
+/* ── 서명 ───────────────────────────────────────────────────────────── */
+.sign-note { left: 52pt; width: 491.28pt; font-size: 9.8pt; line-height: 1.35; color: var(--ink-3); }
+.sign-box  { border: 1pt solid var(--field); border-radius: 4pt; background: #FFFFFF; }
+.sign-hint { font-size: 9.5pt; line-height: 14pt; color: #97A3AD; white-space: nowrap; }
+
+/* ── 푸터 ───────────────────────────────────────────────────────────── */
+.foot-rule { left: 52pt; top: 782pt; width: 491.28pt; border-top: 0.75pt solid var(--line); }
+.foot-text {
+  left: 52pt; top: 794pt; width: 491.28pt;
+  text-align: center; font-size: 9.5pt; line-height: 1.35; color: var(--ink-3);
+  text-wrap: balance;
+}
+
+/* 숫자+단위·고유명처럼 갈라지면 안 되는 덩어리 */
+.nb { white-space: nowrap; }
+</style>
+</head>
+<body>
+
+<!-- 헤더 -->
+<div class="at header"></div>
+<img class="at logo" src="assets/eformsign-logo-blue.png" alt="이폼사인">
+<div class="at title">방문자 기록부</div>
+<div class="at subtitle">아래 항목을 모두 입력하고 서명해 주세요. 방문 확인과 시설 출입 관리를 위해 사용합니다.</div>
+
+<!-- 섹션 1 · 방문 정보 -->
+<div class="at sec-bar"  style="left:52pt; top:148pt"></div>
+<div class="at sec-name" style="left:62pt; top:146pt">방문 정보</div>
+
+<div class="at label" style="top:180pt">방문 일시</div>
+<div class="at box" data-field="방문일시" style="left:160pt; top:172pt; width:200pt"></div>
+
+<div class="at label" style="top:226pt">방문자 성명</div>
+<div class="at box" data-field="방문자성명" style="left:160pt; top:218pt; width:260pt"></div>
+
+<div class="at label" style="top:272pt">소속</div>
+<div class="at box" data-field="소속" style="left:160pt; top:264pt; width:383.28pt"></div>
+
+<div class="at label" style="top:318pt">연락처</div>
+<div class="at box" data-field="연락처" style="left:160pt; top:310pt; width:260pt"></div>
+
+<div class="at label" style="top:364pt">방문 목적</div>
+<div class="at radio"       data-field="방문목적" data-option="회의" style="left:160pt; top:365pt"></div>
+<div class="at radio-label" style="left:180pt; top:365pt">회의</div>
+<div class="at radio"       data-field="방문목적" data-option="납품" style="left:236pt; top:365pt"></div>
+<div class="at radio-label" style="left:256pt; top:365pt">납품</div>
+<div class="at radio"       data-field="방문목적" data-option="면접" style="left:312pt; top:365pt"></div>
+<div class="at radio-label" style="left:332pt; top:365pt">면접</div>
+<div class="at radio"       data-field="방문목적" data-option="견학" style="left:388pt; top:365pt"></div>
+<div class="at radio-label" style="left:408pt; top:365pt">견학</div>
+<div class="at radio"       data-field="방문목적" data-option="기타" style="left:464pt; top:365pt"></div>
+<div class="at radio-label" style="left:484pt; top:365pt">기타</div>
+
+<div class="at label" style="top:410pt">만나는 담당자</div>
+<div class="at box" data-field="담당자" style="left:160pt; top:402pt; width:260pt"></div>
+
+<!-- 섹션 2 · 개인정보 수집·이용 동의 -->
+<div class="at card"        style="top:460pt; height:144pt"></div>
+<div class="at card-accent" style="top:460pt; height:144pt"></div>
+<div class="at card-head"   style="top:478pt">개인정보 수집·이용 동의</div>
+<div class="at card-line"   style="top:502pt">수집 항목: 방문 일시, 성명, 소속, 연락처, 방문 목적, 만나는 담당자, 서명</div>
+<div class="at card-line"   style="top:518.5pt">수집 목적: 방문자 확인과 시설 출입 관리, 안전 사고 발생 시 연락</div>
+<div class="at card-line"   style="top:535pt">보유 기간: 수집일로부터 <span class="nb">1년</span>. 기간이 지나면 지체 없이 파기합니다.</div>
+<div class="at card-line"   style="top:551.5pt">동의를 거부할 수 있으나, 동의하지 않으면 시설 출입이 제한될 수 있습니다.</div>
+<div class="at card-rule"   style="top:571pt"></div>
+<div class="at check" data-field="개인정보동의" style="left:72pt; top:580pt"></div>
+<div class="at check-text" style="left:92pt; top:580pt">위 내용을 확인하였으며 개인정보 수집·이용에 동의합니다. <span class="nb">(필수)</span></div>
+
+<!-- 섹션 3 · 확인 및 서명 -->
+<div class="at sec-bar"   style="left:52pt; top:632pt"></div>
+<div class="at sec-name"  style="left:62pt; top:630pt">확인 및 서명</div>
+<div class="at sign-note" style="top:654pt">기재한 내용이 사실과 다르지 않음을 확인합니다. 아래 칸에 서명해 주세요.</div>
+
+<div class="at label" style="top:706pt">방문자 서명</div>
+<div class="at sign-box" data-field="방문자서명" style="left:160pt; top:674pt; width:260pt; height:80pt"></div>
+<div class="at sign-hint" style="left:432pt; top:707pt">손가락이나 펜으로 서명해 주세요.</div>
+
+<!-- 푸터 -->
+<div class="at foot-rule"></div>
+<div class="at foot-text">작성해 주셔서 감사합니다. 전송을 누르면 다음 방문자용 화면이 다시 열립니다.</div>
+
+</body>
+</html>
