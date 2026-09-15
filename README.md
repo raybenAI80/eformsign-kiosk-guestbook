@@ -155,8 +155,15 @@ ReferenceError 로 메시지 처리가 통째로 죽는다. `index.html` 에 정
 
 ## 서식(템플릿) — 항목별 컴포넌트
 
-운영 템플릿 `e86be31eb2e3485184b94d3d58540095` **「방문자 기록부(방명록) v3 OZW」**(2026-09-11 전환).
-서식은 **OZW**라서 다른 작업자가 **콘솔 웹폼 디자이너에서 열어 필드를 옮기고 추가**할 수 있다.
+운영 템플릿 `31de7ab146d14f2bb923d7a94d7122e5` **「방문자 기록부(방명록) v6 OZW」**(2026-09-15 전환).
+서식은 **OZW**라서 다른 작업자가 **콘솔 웹폼 디자이너에서 열어 필드를 옮기고 추가**할 수 있다 —
+2026-09-15 소유 계정 콘솔에서 **배경 PDF 전면 렌더 + 「추가된 입력 항목 8」** 로 열리는 것을 실기 확인했다.
+
+🔴 **v3~v5 는 디자이너에서 빈 캔버스로 열렸다**(서버·작성·제출은 전부 정상이라 조용했다). 원인 3종:
+① tail 라디오 구분자 VT(U+000B) = XML 1.0 불법문자 ② `OZPAGE/@PDFDOC_NAME` 이 섹션명(리터럴 `PDFDocument` 여야 함)
+③ 🔴 `ozw1` 앞 **12바이트 리소스 컨테이너 헤더** `0D 0A 00 00 03 E9 00 00 00 01 00 04` 누락.
+셋 다 `eformsign-core` 방출·검증 게이트로 막았다. 전말 = `D:\pjt\eformsign\docsesearch\ozw-designer-open-failure-2026-09-15.md`.
+구본은 삭제하지 않고 `v3 OZW 구본(VT 결함)` / `v4·v5 중간본` 으로 개명해 남겼다.
 
 소스는 `form/`(좌표 단일 진실원천 `layout.mjs` → `build-pdf.mjs` → `build-ozr.mjs` → `build-ozw.mjs`)이다.
 `build-ozw.mjs` 는 SDK `buildOzwFromPdfBacked(...)` 를 부르는 얇은 스크립트다 — OZR 봉투 뒤에
@@ -220,7 +227,7 @@ node --env-file=D:/pjt/eformsign/eformsign-core/.env   D:/pjt/eformsign/form-fac
 node D:/pjt/eformsign/eformsign-cli/dist/cli.js ozw build-from-pdf form/guestbook.ozr -o form/guestbook.ozw   --required 방문일시 --required 방문자성명 --required 소속 --required 연락처   --required 방문목적 --required 담당자 --required 개인정보동의
 ```
 
-같은 입력이면 산출 바이트가 항상 같다(고정점 sha256 `9346a5cb5577f350…`) — 재방출본이 배포본과
+같은 입력이면 산출 바이트가 항상 같다(현행 고정점 sha256 `d06c9eff27a68346…`, 91,933B) — 재방출본이 배포본과
 byte-identical 인지로 회귀를 잡는다.
 그리고 `config.js` 의 `templateId` 를 갱신한다. 구본은 **삭제하지 말고 개명**해 둔다.
 ⚠️ `createFromFile` 은 같은 이름이면 `400 [4000048] The connection name already exists` 로 거부한다.

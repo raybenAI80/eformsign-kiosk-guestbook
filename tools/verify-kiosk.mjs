@@ -31,7 +31,15 @@ const click = async (x, y, wait = 1200) => {
   await send('Input.dispatchMouseEvent', { type: 'mouseReleased', x, y, button: 'left', clickCount: 1 });
   await sleep(wait);
 };
-const type = async (s) => { for (const ch of s) await send('Input.insertText', { text: ch }); };
+/** OZ 뷰어의 입력칸은 insertText 만으로는 값이 들어가지 않는다 — 실제 키 이벤트까지 함께 보낸다. */
+const type = async (s) => {
+  for (const ch of s) {
+    await send('Input.dispatchKeyEvent', { type: 'keyDown', text: ch, unmodifiedText: ch, key: ch });
+    await send('Input.dispatchKeyEvent', { type: 'char', text: ch, unmodifiedText: ch, key: ch });
+    await send('Input.dispatchKeyEvent', { type: 'keyUp', key: ch });
+    await sleep(60);
+  }
+};
 const shot = async (name) => {
   const r = await send('Page.captureScreenshot', { format: 'png' });
   fs.mkdirSync(EV, { recursive: true });
