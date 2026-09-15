@@ -170,9 +170,17 @@ esearch\ozw-designer-open-failure-2026-09-15.md`.
 `build-ozw.mjs` 는 SDK `buildOzwFromPdfBacked(...)` 를 부르는 얇은 스크립트다 — OZR 봉투 뒤에
 `ozw1` 편집기 tail 을 붙여 `.ozw` 를 방출한다(API 키만 필요, 콘솔 로그인 불필요).
 
-구 운영본 `e1fef806750248d5993c2ecee84e9502` 는 **「방문자 기록부(방명록) v2 OZR 구본」** 으로
+구 운영본 `e1fef806750248d5993c2ecee84e9502` 는 **「[구본] 방문자 기록부(방명록) v2 OZR 구본」** 으로
 개명해 롤백본으로 남겼다(삭제하지 않았고, 재release 해 두어 그대로 되돌릴 수 있다).
 그쪽은 PDF-backed **OZR** 이라 웹폼 디자이너에서 열어 고칠 수 없다.
+
+🔴 **남은 구본은 이름 앞에 `[구본] ` 접두어를 붙인다**(2026-09-15). 콘솔 템플릿 목록에서 운영본과
+육안으로 갈라내기 위한 규칙이다 — 현재 `[구본] … v2 OZR 구본`(`e1fef806…`) ·
+`[구본] … v3 OZW 구본(VT 결함)`(`e86be31e…`) 둘이고, 접두어 없는 「방문자 기록부(방명록) v6 OZW」
+하나만 운영본이다. 개명도 저장이므로 **개명 뒤 release 재요청**을 반드시 한다.
+🔴 개명은 `update_date` 를 갱신해 **목록 정렬을 뒤집는다.** 운영본을 맨 위에 두려면 구본을 먼저 개명하고
+운영본을 **마지막에** 저장한다(무변경 재저장으로 `update_date` 만 올릴 수 있다 —
+`.work/resave-v6.mjs`, 전후 GET 깊은 비교로 실질 변경 0건을 확인한다).
 
 | 항목 | 컴포넌트 | 스키마 `input_type` | 비고 |
 |---|---|---|---|
@@ -245,6 +253,7 @@ byte-identical 인지로 회귀를 잡는다.
 - [ ] 워크플로 **시작(방문자) → 완료** 2단계로 충분하다. 담당자 확인이 필요하면 3단계
 - [ ] 필수 항목이 write 단계 `input_control_option` 에서 `required: true`
 - [ ] **문서 제목 규칙** = `$$current_datetime$$_방문자 기록부(방명록)__{{방문자성명}}__{{소속}}` (`kiosk verify-template` 가 정보로 출력)
+- [ ] **문서 관리자 지정** — 운영본 v6 는 `rayben@forcs.com`. 값은 `permissionAuth.managers.members` 에 있다(`auth.form_manager` 아님)
 - [ ] `config.js` 의 `templateId` / `companyId` 가 그 템플릿을 가리킨다
 
 한 줄 점검(키오스크 조건 전용 — 결함이면 exit 1):
@@ -273,9 +282,24 @@ node D:/pjt/eformsign/form-factory/scripts/config-health.mjs   --form <id> --ozr
 `49965ace58394fbbb45a1005be8e3c99` 로 확인).
 
 - **지금 문서를 볼 수 있는 곳**: 이폼사인 콘솔 > **문서 관리**(문서 관리자·대표 관리자 전용).
-  현재 이 템플릿의 `auth.form_manager.members` 가 비어 있어 **대표 관리자만** 보인다.
-  담당자가 보게 하려면 대표 관리자가 회사 관리 > 권한 관리에서 그 멤버를 이 템플릿의
-  **문서 관리자**로 지정해야 한다.
+  매뉴얼 chapter8 「문서 관리/일괄 작성 문서 관리」: 「문서 관리: 문서 관리자 권한이 있는 멤버만 접근
+  가능한 메뉴입니다. 해당 멤버는 **문서 관리 권한이 있는 템플릿으로 작성된 모든 문서**를 조회할 수
+  있습니다. (Note) 대표 관리자는 모든 문서를 조회하고 관리할 수 있습니다.」
+  개인 문서함 3종은 「내가 작성 또는 처리한 문서」 기준이라 외부 URL 작성자 문서를 담지 못하지만,
+  문서 관리만 **권한 기준**이라 담는다.
+- **운영본 v6 의 문서 관리자 = `rayben@forcs.com`**(2026-09-15 지정, 소유자 겸 대표 관리자).
+  🔴 엔트리 형태는 객체가 아니라 **계정 id 문자열**이다 — `auth.managers.members: ["rayben@forcs.com"]`.
+  객체(`{id,name}` 등)를 실으면 저장이 `500 [5000001]` 로 죽는다.
+  🔴 저장은 폼의 **`permissionAuth`**(JSON 문자열, `type:"form_permission"`)의 `managers.members` 에
+  반영되고 **`auth.form_manager.members` 는 `[]` 로 남는다**(이 GET 이 채우지 않는 파생 뷰).
+  `auth` 만 보고 "지정 없음"으로 판정하면 오판이다 — `kiosk verify-template` 게이트도 이 때문에
+  지정 후에도 WARN 을 띄우고 있었고, 2026-09-15 `permissionAuth` 우선 읽기로 고쳤다.
+  🔴 문서화된 `PATCH /v2.0/api/forms/{id}/permissions` 의 `modify.managers` 는 **수정 권한**에 붙는
+  관리자 역할이라 문서 관리자 지정에 쓸 수 없다(`DOCUMENT_MANAGER` 추가는 200 + 부분 실패로 무시된다).
+- **대표 관리자가 아닌 담당자**를 추가하려면 템플릿 쪽 지정만으로는 부족하다. 대표 관리자가
+  회사 관리 > 권한 관리 > 문서 관리자에서 그 멤버를 추가하고 **관리 문서 조건**(작성자 + 문서 종류/템플릿)
+  까지 설정해야 한다(매뉴얼 chapter2 「문서 관리자」). 상세는
+  `evidence/final/decisions-applied-2026-09-15.md` §3.
 - 목록 컬럼에 방문일시·성명·소속·방문 목적·담당자가 나오도록 `display_settings` 를 잡아 두었다
   (연락처·동의·서명은 개인정보라 목록에서 숨김 — 문서를 열면 보인다).
 
@@ -447,3 +471,17 @@ https://eformsign-kiosk-guestbook.vercel.app/?mode=thanks&sec=4&idle=30
 
 🔴 `templates.delete` 는 500 을 돌려주고도 실제로는 삭제된 경우가 있다. 삭제 판정은
 **삭제 후 fresh 재조회**로만 한다(이번에는 템플릿 목록 171 → 165, 대상 6종 잔존 0건으로 확인).
+
+### 후속 결정 적용 (2026-09-15, 사용자 승인 "추천안대로")
+
+- 보류 6건 중 **자음 나열 4건 삭제**(`22946aca`·`a9daa808`·`b324f2b2`·`7b6f619b`), 재조회 잔존 0.
+- **실명 2건 보존**(`9fffd6a2` 백혁준 · `0dec68d3` 최현) + 승인 보존 3건 생존 확인.
+- 구본 2종은 **소속 문서가 남아 삭제하지 않고** `[구본] ` 접두어만 붙였다(둘 다 재release 해 `is_release: true`).
+  소속 문서 0건이 되는 구본은 이번에 없었다.
+- 운영본 v6 를 **무변경 재저장**해 `update_date` 갱신 — 템플릿 165개 중 순위 2위 → **1위**.
+- 운영본 v6 에 **문서 관리자 `rayben@forcs.com` 지정** → `kiosk verify-template` WARN 0건 · exit 0.
+- 전후 상태·재조회 결과·부정 결과(객체 엔트리 500, permissions API 불가):
+  `evidence/final/decisions-applied-2026-09-15.md`
+
+🔴 `documents.delete` 는 `memberId` 를 **명시로 받아야** 한다 — 생략하면
+`This API requires a member-scoped token` 으로 전건 실패한다(`templates` 쪽과 다르다).
