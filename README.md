@@ -211,6 +211,10 @@ v7 이전 = `layout.mjs` → `build-pdf.mjs` → `build-ozr.mjs` → `build-ozw.
 🔴 개명은 `update_date` 를 갱신해 **목록 정렬을 뒤집는다.** 운영본을 맨 위에 두려면 구본을 먼저 개명하고
 운영본을 **마지막에** 저장한다(무변경 재저장으로 `update_date` 만 올릴 수 있다 —
 `.work/resave-v6.mjs`, 전후 GET 깊은 비교로 실질 변경 0건을 확인한다).
+🔴 **그 「무변경 재저장」은 문서 관리자를 지운다**(2026-09-15 v8 에서 실측). 저장 경로가 `toCreateShapeAuth(f.auth)`
+를 쓰는데 `auth.managers` 는 **비어 있는 파생 뷰**라, 실제 저장소인 `permissionAuth.managers.members` 의
+`["rayben@forcs.com"]` 이 `[]` 로 덮인다. 재저장 뒤에는 **반드시 `.work/set-manager.mjs --shape string` 을 다시**
+돌린다(겸사겸사 그게 마지막 저장이 되어 목록 맨 위도 유지된다).
 
 | 항목 | 컴포넌트 | 스키마 `input_type` | 비고 |
 |---|---|---|---|
