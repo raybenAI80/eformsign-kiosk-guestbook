@@ -155,7 +155,26 @@ ReferenceError 로 메시지 처리가 통째로 죽는다. `index.html` 에 정
 
 ## 서식(템플릿) — 항목별 컴포넌트
 
-운영 템플릿 `9ee8126bcf4248a68d966a8b56759e6d` **「방문자 기록부(방명록) v7 OZW」**(2026-09-15 전환).
+운영 템플릿 `bf35f6c28c7945a48a9668fb00711466` **「방문자 기록부(방명록) v8 OZW(디자인 배경)」**(2026-09-15 전환).
+
+🔴 **v8 부터 배경은 스크립트가 그리지 않는다 — 디자인 HTML 이 단일 진실 원천이다.**
+`form/design/guestbook.html` → `render-pdf.mjs` → `guestbook-design.pdf`(배경) · `extract-layout.mjs` →
+`layout.design.mjs`(좌표 실측). 빌드는 두 산출물을 인자로 받는다:
+
+```bash
+node form/design/render-pdf.mjs && node form/design/extract-layout.mjs   # 디자인을 고쳤을 때만
+node form/build-ozr.mjs --layout form/design/layout.design.mjs \n                        --pdf    form/design/guestbook-design.pdf
+node form/build-ozw.mjs
+```
+인자를 생략하면 예전 경로(`form/layout.mjs` + `form/guestbook.pdf`, 스크립트가 그린 배경 = v7)로
+떨어진다. `build-ozr.mjs` 에 **FORMID 매핑 하드 게이트**가 있어 layout 의 id 8개가 `FORM_IDS`
+키와 어긋나면 던진다(제목 규칙이 `{{방문자성명}}`·`{{소속}}` 한글 FORMID 에 묶여 있다).
+자세한 파이프라인은 `form/design/README.md`.
+
+**서식을 고치는 절차** = ① `form/design/guestbook.html` 을 고친다 ② `render-pdf` → `extract-layout`
+③ `build-ozr --layout/--pdf` → `build-ozw` ④ `ozw inspect` + `gate-verify --task "OZW 손수 방출"`
+⑤ **새 템플릿으로 배포**(기존 템플릿 파일 교체가 아니라 신규 배포 + 설정 복사 + 개명·전환).
+구본은 `[구본] ` 접두어를 붙이고 **구본을 먼저 저장, 운영본을 마지막에 저장**한다.
 
 🔴 **v6 는 방문자가 글자를 못 넣었다 — 입력 읽기전용 결함.** v6 빌드에서 report 입력요소에 심은
 `P_ENABLES`/`P_REQUIREDS`(참여자 비트마스크) 때문이다. 공개 URL 작성 화면에서 입력칸 강조가
@@ -173,8 +192,11 @@ ReferenceError 로 메시지 처리가 통째로 죽는다. `index.html` 에 정
 셋 다 `eformsign-core` 방출·검증 게이트로 막았다. 전말 = `D:\pjt\eformsign\docs
 esearch\ozw-designer-open-failure-2026-09-15.md`.
 구본은 삭제하지 않고 `v3 OZW 구본(VT 결함)` / `v4·v5 중간본` 으로 개명해 남겼다.
+v7 은 **`[구본] 방문자 기록부(방명록) v7 OZW(스크립트 배경)`**(`9ee8126b…`)로 개명하고 release 를 유지했다 —
+배경만 다르고 동작은 동일하므로 즉시 롤백본으로 쓸 수 있다.
 
-소스는 `form/`(좌표 단일 진실원천 `layout.mjs` → `build-pdf.mjs` → `build-ozr.mjs` → `build-ozw.mjs`)이다.
+소스는 `form/`(v8 = `design/guestbook.html` → `render-pdf`·`extract-layout` → `build-ozr --layout/--pdf` → `build-ozw`;
+v7 이전 = `layout.mjs` → `build-pdf.mjs` → `build-ozr.mjs` → `build-ozw.mjs`)이다.
 `build-ozw.mjs` 는 SDK `buildOzwFromPdfBacked(...)` 를 부르는 얇은 스크립트다 — OZR 봉투 뒤에
 `ozw1` 편집기 tail 을 붙여 `.ozw` 를 방출한다(API 키만 필요, 콘솔 로그인 불필요).
 
@@ -232,7 +254,8 @@ DateTimePicker 의 `OnInitialize` 가 `if (This.GetText() == "") { This.SetDateT
 그대로) **새 템플릿을 만든다.**
 
 ```bash
-node form/build-pdf.mjs && node form/build-ozr.mjs && node form/build-ozw.mjs   # 좌표 수정 후
+node form/design/render-pdf.mjs && node form/design/extract-layout.mjs        # 디자인(HTML) 수정 후
+node form/build-ozr.mjs --layout form/design/layout.design.mjs --pdf form/design/guestbook-design.pdf && node form/build-ozw.mjs
 node --env-file=D:/pjt/eformsign/eformsign-core/.env   tools/deploy-guestbook.mjs --name "방문자 기록부(방명록) v4 OZW" --ozr form/guestbook.ozw --recaptcha off
 node --env-file=D:/pjt/eformsign/eformsign-core/.env   D:/pjt/eformsign/eformsign-cli/dist/cli.js kiosk verify-template <새 id>
 node --env-file=D:/pjt/eformsign/eformsign-core/.env   D:/pjt/eformsign/form-factory/scripts/config-health.mjs --form <새 id> --ozr form/guestbook.ozr --expect form/config-health.expect.json

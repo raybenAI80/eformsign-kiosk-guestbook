@@ -1,14 +1,27 @@
 /** layout.mjs + guestbook.pdf → 방문자 기록부 OZR (PDF-backed, from-scratch). */
 import { readFileSync, writeFileSync } from 'node:fs';
-import { join, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { join, dirname, resolve, isAbsolute } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createRequire } from 'node:module';
-import * as L from './layout.mjs';
 
 const require = createRequire(import.meta.url);
 const { buildPdfBackedOzr } = require('D:/pjt/eformsign/eformsign-core/dist/src/index.js');
 const here = dirname(fileURLToPath(import.meta.url));
-const pdf = readFileSync(join(here, 'guestbook.pdf'));
+
+/** --layout <path> · --pdf <path> (생략 시 기존 기본값 = 스크립트가 그린 배경) */
+const argv = process.argv.slice(2);
+const arg = (name) => { const i = argv.indexOf(`--${name}`); return i >= 0 ? argv[i + 1] : undefined; };
+const abs = (p, fallback) => (p ? (isAbsolute(p) ? p : resolve(process.cwd(), p)) : join(here, fallback));
+
+const layoutPath = abs(arg('layout'), 'layout.mjs');
+const pdfPath = abs(arg('pdf'), 'guestbook.pdf');
+const L = await import(pathToFileURL(layoutPath).href);
+const pdf = readFileSync(pdfPath);
+console.error(`[build-ozr] layout=${layoutPath}
+[build-ozr] pdf=${pdfPath}`);
+
+// 🔴 FORMID 매핑 하드 게이트 — layout 이 바뀌어도 8개 id 가 FORM_IDS 키와 정확히 일치해야 한다.
+//    (제목 규칙이 {{방문자성명}}·{{소속}} 한글 FORMID 에 묶여 있다.)
 
 const FORM_IDS = {
   visit_datetime: '방문일시',
@@ -32,6 +45,15 @@ fields.push({
 });
 fields.push({ id: L.consent.checkId, label: '개인정보 수집·이용 동의', page: 1, type: 'checkbox', bbox: L.consent.checkBox });
 fields.push({ id: L.sign.id, label: L.sign.label, page: 1, type: 'signature', bbox: L.sign.box });
+
+const seen = fields.map((f) => f.id);
+const want = Object.keys(FORM_IDS);
+const missing = want.filter((k) => !seen.includes(k));
+const extra = seen.filter((k) => !want.includes(k));
+if (missing.length || extra.length) {
+  throw new Error(`FORMID 매핑 불일치 — missing=${JSON.stringify(missing)} extra=${JSON.stringify(extra)}`);
+}
+if (L.purpose.options.length !== 5) throw new Error(`방문목적 옵션 ${L.purpose.options.length}개 (5개여야 함)`);
 
 const result = await buildPdfBackedOzr({
   pdf,
