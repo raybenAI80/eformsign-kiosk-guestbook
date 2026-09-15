@@ -1,0 +1,8 @@
+PROTECT 충돌 0건 — 실행
+DOC OK   ca4199dd93014820abad35b629b6396b {"result":{"success_result":["ca4199dd93014820abad35b629b6396b"],"fail_result":[]},"code":"-1","mess
+DOC OK   737b8567a61646338c6fb331caaaf8ae {"result":{"success_result":["737b8567a61646338c6fb331caaaf8ae"],"fail_result":[]},"code":"-1","mess
+DOC OK   fc06f1b932b241e2aed618fe76495af2 {"result":{"success_result":["fc06f1b932b241e2aed618fe76495af2"],"fail_result":[]},"code":"-1","mess
+DOC OK   1f948e84c9ce4a75895af361b18fa197 {"result":{"success_result":["1f948e84c9ce4a75895af361b18fa197"],"fail_result":[]},"code":"-1","mess
+TPL ERR  c9f7a7de51bf426e910f13883180eb46 Error: Templates.list() / get() requires a member-scoped token. Provide options.memberId or set defaultMemberId on the client.
+TPL ERR  9f811e9bd2b44bb0aca8782b0b8c1223 Error: Templates.list() / get() requires a member-scoped token. Provide options.memberId or set defaultMemberId on the client.
+TPL ERR  283210e59ebe4156af5707effd2067b0 Error: Templates.list() / get() requires a member-scoped token. Provide options.memberId or set defaultMemberId on the client.
