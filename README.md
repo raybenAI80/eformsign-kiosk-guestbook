@@ -354,6 +354,7 @@ esearch\ozw-template-api-creation-feasibility-2026-09-11.md`.
 | `probe-components.mjs` | 달력 팝업·텍스트·라디오·체크 어포던스를 순서대로 캡처 |
 | `probe-sign-send.mjs` / `probe-sign2.mjs` | 서명 패드 열기 → 그리기 → 확인 → 전송 |
 | `probe-recaptcha.mjs` | reCAPTCHA ON 상태의 전송 팝업 캡처(체크하지 않는다) |
+| `designer-observe.mjs` | 🔴 **웹폼 디자이너 로드 관찰기**(CDP, 로그인된 실제 Chrome). `create_form.html?form_id=<id>&type=modify` 를 열어 네트워크 전수·콘솔·예외·전역 프로브를 JSON 으로 저장한다. 판정은 화면이 아니라 수치로: `__DesignerView__.m_pViewPageArray.length>=1` · `__DesignerFrame__.m_pCompManager.m_nCompCount==필드수`. 게이트 `ozw-designer-open` 의 증거 수집기 |
 | `probe-idle-reset.mjs` | 무응답 리셋 3케이스 실기 검증(프레임 포커스 유지 40초 무리셋 / 카운트다운→리셋 / 터치 취소). `evidence/final/idle-*.png` + `idle-cases-report.json` 생성, 전부 PASS 면 exit 0 |
 
 검증용 헤드리스 크롬 띄우기:
