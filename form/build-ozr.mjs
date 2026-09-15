@@ -39,8 +39,8 @@ const result = await buildPdfBackedOzr({
   sectionName: '방문자 기록부',
   fields,
   formIds: FORM_IDS,
-  pageWidth: 594.96,
-  pageHeight: 841.92,
+  pageWidth: 595,
+  pageHeight: 842,
   required: [
     { formId: '방문일시' }, { formId: '방문자성명' }, { formId: '소속' }, { formId: '연락처' },
     { formId: '방문목적', kind: 'radio' }, { formId: '담당자' },

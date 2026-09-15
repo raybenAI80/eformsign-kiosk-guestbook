@@ -9,7 +9,7 @@ window.KIOSK_CONFIG = {
   countryCode: 'kr',
 
   // 템플릿 ID (템플릿 관리 > 설정 아이콘 클릭 후 URL의 form_id)
-  templateId: 'e86be31eb2e3485184b94d3d58540095',
+  templateId: '31de7ab146d14f2bb923d7a94d7122e5',
 
   // 화면 상단에 띄울 이름/안내 (템플릿 이름과 별개로 자유 문구)
   title: '방문자 기록부',

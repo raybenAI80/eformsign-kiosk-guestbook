@@ -66,8 +66,11 @@ for (let round = 1; round <= ROUNDS; round++) {
   await shot(`${TAG}-r${round}-2-editable`);
 
   if (!process.argv.includes('--notype')) {
-    await click(480, 723, 1500);   // 성명 입력칸
+    await click(480, 464, 1500);   // 성명 입력칸 (현행 좌표, 2026-09-15 재확인)
     await type(visitor);
+    await sleep(800);
+    await click(520, 518, 1200);   // 소속 입력칸
+    await type('검증팀');
     await sleep(1200);
   }
   await shot(`${TAG}-r${round}-3-filled`);
