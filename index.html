@@ -43,12 +43,23 @@
   header#kioskHeader .bar {
     width: 4px; align-self: stretch; background: var(--brand); border-radius: 2px;
   }
+  /* 「처음부터 다시」 — 헤더 우측. 오작동을 줄이려고 작게 두고, 누르면 확인 오버레이를 거친다. */
+  #btnRestart {
+    margin-left: auto; align-self: center;
+    appearance: none; background: #fff; color: var(--brand);
+    border: 1.5px solid var(--brand); border-radius: 8px;
+    font-family: inherit; font-size: 14px; font-weight: 600;
+    padding: 8px 14px; cursor: pointer; white-space: nowrap;
+  }
+  #btnRestart[hidden] { display: none !important; }
 
   main#stage { position: relative; flex: 1 1 auto; min-height: 0; }
   /* 🔴 efs_embedded_v2.js 의 open() 은 $('#id').attr('src', url) 를 한다 →
      이 id 를 가진 요소는 반드시 <iframe> 이어야 한다(div 면 아무 일도 안 일어난다). */
   #frameHost { position: absolute; inset: 0; }
   #frameHost iframe { width: 100%; height: 100%; border: 0; display: block; background: #fff; }
+  /* 복귀 카운트다운이 뜬 동안에는 작성 중이던 내용을 흐리게 가린다(개인정보 노출 완화) */
+  #frameHost.blurred iframe { filter: blur(6px); }
 
   /* 오버레이 공통 */
   .overlay {
@@ -90,6 +101,11 @@
   }
   .btn.secondary { background: #fff; color: var(--brand); border: 1.5px solid var(--brand); }
 
+  /* 「처음부터 다시」 확인 — 실수 터치로 내용이 날아가지 않도록 한 번 더 묻는다 */
+  #ovRestart { z-index: 20; gap: 16px; }
+  #ovRestart h2 { font-size: 30px; }
+  .actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+
   .spinner {
     width: 34px; height: 34px; border-radius: 50%;
     border: 3px solid var(--line); border-top-color: var(--brand);
@@ -121,6 +137,7 @@
       <h1 id="hTitle">방문자 기록부</h1>
       <p id="hSub">방문 정보를 입력하고 서명해 주세요.</p>
     </div>
+    <button id="btnRestart" type="button">처음부터 다시</button>
   </header>
 
   <main id="stage">
@@ -150,6 +167,16 @@
       <button class="btn" id="btnKeep" type="button">계속 작성하기</button>
     </section>
 
+    <!-- 「처음부터 다시」 확인 -->
+    <section class="overlay" id="ovRestart" hidden>
+      <h2>입력한 내용이 지워집니다.</h2>
+      <p>처음부터 다시 시작할까요?</p>
+      <div class="actions">
+        <button class="btn" id="btnRestartYes" type="button">처음부터 다시 시작</button>
+        <button class="btn secondary" id="btnRestartNo" type="button">계속 작성하기</button>
+      </div>
+    </section>
+
     <!-- 오류 -->
     <section class="overlay" id="ovError" hidden>
       <h2>작성 화면을 열지 못했습니다.</h2>
@@ -176,6 +203,7 @@
   if (q.get('sec')) C.thanksSeconds = Number(q.get('sec'));
   if (q.get('idle')) C.idleResetSeconds = Number(q.get('idle'));
   if (q.get('abandon')) C.abandonResetSeconds = Number(q.get('abandon'));
+  if (q.get('countdown')) C.countdownSeconds = Number(q.get('countdown'));
   if (q.get('template')) C.templateId = q.get('template');
   if (q.get('company')) C.companyId = q.get('company');
   if (q.get('debug')) C.debug = q.get('debug') !== '0';
@@ -184,6 +212,8 @@
   // 무응답 리셋: 입력 시작 전(idle) / 입력 중 이탈(abandon) 두 기준을 따로 둔다.
   if (!(C.idleResetSeconds >= 0)) C.idleResetSeconds = 120;
   if (!(C.abandonResetSeconds > 0)) C.abandonResetSeconds = 180;
+  // 복귀 카운트다운 — 리셋 몇 초 전부터 "계속 작성하시겠습니까?" 를 띄울지
+  if (!(C.countdownSeconds > 0)) C.countdownSeconds = 5;
 
   var $ = function (id) { return document.getElementById(id); };
   var els = {
@@ -193,13 +223,16 @@
     errBox: $('errBox'), countdown: $('countdown'),
     hTitle: $('hTitle'), hSub: $('hSub'),
     thanksTitle: $('thanksTitle'), thanksSub: $('thanksSub'),
-    btnSkip: $('btnSkip'), btnRetry: $('btnRetry'), log: $('log')
+    btnSkip: $('btnSkip'), btnRetry: $('btnRetry'), log: $('log'),
+    btnRestart: $('btnRestart'), restart: $('ovRestart'),
+    btnRestartYes: $('btnRestartYes'), btnRestartNo: $('btnRestartNo')
   };
 
   els.hTitle.textContent = C.title || '방문자 기록부';
   els.hSub.textContent = C.subtitle || '';
   els.thanksTitle.textContent = C.thanksMessage || '작성해 주셔서 감사합니다.';
   els.thanksSub.textContent = C.thanksSubMessage || '';
+  els.idleRing.textContent = String(C.countdownSeconds);
   if (C.debug) els.log.hidden = false;
 
   // ---------- 로그 ----------
@@ -224,6 +257,8 @@
     els.loading.hidden = which !== 'loading';
     els.thanks.hidden = which !== 'thanks';
     els.error.hidden = which !== 'error';
+    els.btnRestart.hidden = which === 'thanks';   // 감사 화면에서는 되돌릴 것이 없다
+    if (which !== null) closeRestartConfirm();
     if (which) cancelWarn('show:' + which);      // 무응답 경고는 작성 화면에서만 뜬다
     state.phase = which || 'form';
     log('phase=' + state.phase);
@@ -241,7 +276,7 @@
   //      · 입력 시작 전(프레임에 한 번도 포커스가 안 간 세션) = idleResetSeconds
   //      · 입력 중(프레임에 포커스가 갔던 세션)               = abandonResetSeconds,
   //        그것도 포커스가 프레임 밖에 있을 때만 카운트한다.
-  var WARN_SECONDS = 5;
+  var WARN_SECONDS = C.countdownSeconds;      // 복귀 카운트다운(초) — config.countdownSeconds / ?countdown=
   var idle = { last: Date.now(), source: 'boot', engaged: false, warnLeft: 0 };
   window.__kioskIdle = idle;
 
@@ -279,6 +314,7 @@
     els.idleSub.textContent = left + '초 뒤 처음 화면으로 돌아갑니다.';
     if (els.idle.hidden) {
       els.idle.hidden = false;
+      els.host.classList.add('blurred');        // 카운트다운 동안 작성 내용을 가린다
       log('무응답 경고 표시 — 남은 ' + left + 's, 마지막 활동 출처=' + idle.source);
     }
   }
@@ -286,6 +322,7 @@
     if (idle.warnLeft > 0 || !els.idle.hidden) log('무응답 경고 취소 by=' + (by || 'unknown'));
     idle.warnLeft = 0;
     els.idle.hidden = true;
+    els.host.classList.remove('blurred');
   }
 
   setInterval(function () {
@@ -310,6 +347,23 @@
   }, 1000);
 
   els.btnKeep && els.btnKeep.addEventListener('click', function () { armIdle('keep-button'); });
+
+  // ---------- 「처음부터 다시」 ----------
+  function closeRestartConfirm() {
+    if (!els.restart.hidden) { els.restart.hidden = true; log('처음부터 다시 — 취소(입력 내용 유지)'); }
+  }
+  els.btnRestart.addEventListener('click', function () {
+    armIdle('restart-button');
+    if (state.phase === 'thanks') return;
+    els.restart.hidden = false;
+    log('처음부터 다시 — 확인 요청 phase=' + state.phase);
+  });
+  els.btnRestartYes.addEventListener('click', function () {
+    els.restart.hidden = true;
+    log('처음부터 다시 — 사용자 확인, 세션을 새로 시작한다');
+    startSession('manual');
+  });
+  els.btnRestartNo.addEventListener('click', function () { armIdle('restart-cancel'); closeRestartConfirm(); });
 
   // ---------- 브라우저 이탈 방지 ----------
   history.pushState(null, '', location.href);

@@ -1,5 +1,5 @@
 /* 방명록 키오스크 설정 — 이 파일 한 곳만 고치면 된다.
- * URL 쿼리로 덮어쓰기: ?mode=thanks&sec=4&idle=30
+ * URL 쿼리로 덮어쓰기: ?mode=thanks&sec=4&idle=30&abandon=180&countdown=5
  */
 window.KIOSK_CONFIG = {
   // 이폼사인 회사 ID (회사 관리 > 회사 정보 > 기본 정보)
@@ -32,9 +32,11 @@ window.KIOSK_CONFIG = {
   //    🔴 작성 프레임은 cross-origin iframe 이라 그 안의 터치·키 입력이 부모 창에 보이지 않는다.
   //       포커스가 프레임 안에 머무는 동안은 활동으로 간주해 카운트하지 않고,
   //       포커스가 프레임 밖으로 나간 시간만 abandon 으로 센다.
-  //  두 경우 모두 리셋 5초 전에 "계속 작성하시겠습니까?" 경고가 뜨고, 터치하면 취소된다.
+  //  두 경우 모두 리셋 countdownSeconds 초 전에 경고가 뜨고, 터치하면 취소된다.
+  //  · countdownSeconds     : 리셋 직전 "계속 작성하시겠습니까?" 복귀 카운트다운 시간(초).
   idleResetSeconds: 120,
   abandonResetSeconds: 180,
+  countdownSeconds: 5,
 
   // 이폼사인 화면 언어
   langCode: 'ko',

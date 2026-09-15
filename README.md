@@ -74,7 +74,7 @@ OZR 복사 재배포(`redeployOzr`) 로 API 에서 만든 템플릿은 `notifica
 
 그리고 리셋 기준을 둘로 나눈다. 아직 프레임을 건드리지 않은 세션은 `idleResetSeconds`(기본 120초),
 한 번이라도 포커스가 갔던 세션은 `abandonResetSeconds`(기본 180초)를 쓰고 **포커스가 프레임 밖에 있는 시간만** 센다.
-리셋 5초 전에는 "계속 작성하시겠습니까?" 경고가 뜨고 아무 곳이나 터치하면 취소된다.
+리셋 `countdownSeconds` 초 전(기본 5초)에는 "계속 작성하시겠습니까?" 복귀 카운트다운이 뜨고, 그동안 뒤의 작성 내용은 흐리게 가려진다. 아무 곳이나 터치하면 취소된다.
 리셋이 실제로 일어나면 콘솔에 사유·한도·경과·마지막 활동 출처가 남는다
 (`무응답 리셋 실행 — 사유=abandon 한도=180s 경과=181s 마지막 활동 출처=frame-focus`).
 
@@ -107,15 +107,34 @@ python -m http.server 8099 --bind 127.0.0.1
 | `title` / `subtitle` | 키오스크 헤더 문구 |
 | `visitorName` | 외부 작성자 표시 이름(예: `방문자`) |
 | `mode` | `immediate` 또는 `thanks` |
-| `thanksSeconds` / `thanksMessage` / `thanksSubMessage` | 감사 화면 |
-| `idleResetSeconds` | 작성 프레임을 아직 건드리지 않은 세션의 무응답 리셋(초, 기본 120). `0` 이면 리셋 전체를 끔 |
-| `abandonResetSeconds` | 작성 프레임에 포커스가 갔던 세션(= 입력 중)의 이탈 리셋(초, 기본 180). 포커스가 프레임 밖일 때만 카운트 |
+| `thanksSeconds` / `thanksMessage` / `thanksSubMessage` | 감사 화면 (대기시간은 아래 「고객 설정 항목」 표 참조) |
+| `idleResetSeconds` / `abandonResetSeconds` / `countdownSeconds` | 대기시간 4종 — 아래 「고객 설정 항목」 표 참조 |
 | `langCode` | 이폼사인 화면 언어 |
 | `showHeader` | 이폼사인 기본 헤더(전송 버튼 포함). `false` 면 전송 버튼이 사라지므로 직접 만들어야 한다 |
 | `hideRequestPopup` | 전송 확인 팝업 숨김 시도(현재 효과 없음, 제약 5) |
 | `debug` | 우하단 로그 패널 |
 
-URL 쿼리로 덮어쓸 수 있다: `?mode=thanks&sec=5&idle=120&abandon=180&template=<id>&company=<id>&debug=1`
+URL 쿼리로 덮어쓸 수 있다: `?mode=thanks&sec=5&idle=120&abandon=180&countdown=5&template=<id>&company=<id>&debug=1`
+
+### 고객 설정 항목 — 대기시간 4종
+
+대기시간은 전부 `config.js` 에서 고객이 직접 정한다. 현장에서 한 대만 다르게 쓸 때는 URL 쿼리로 덮어쓴다.
+
+| 설정 키 | 뜻 | 기본값 | URL 쿼리 |
+|---|---|---|---|
+| `idleResetSeconds` | 아직 아무도 작성 프레임을 건드리지 않은 빈 화면을 처음 화면으로 되돌리기까지의 시간(초). `0` 이면 리셋 전체를 끔 | `120` | `?idle=` |
+| `abandonResetSeconds` | 방문자가 작성을 시작한 뒤 자리를 뜬 경우의 리셋 시간(초). 포커스가 작성 프레임 밖에 있는 시간만 센다 | `180` | `?abandon=` |
+| `thanksSeconds` | 제출 후 감사 화면을 보여 주는 시간(초). `mode: 'thanks'` 일 때만 쓰인다 | `5` | `?sec=` |
+| `countdownSeconds` | 리셋 직전 「계속 작성하시겠습니까?」 복귀 카운트다운 시간(초) | `5` | `?countdown=` |
+
+권장값: 사람이 계속 지나다니는 **로비·전시 부스는 60~90초**(idle), 차분히 적는 **사무실 접수대는 180초** 정도로 두고, `abandonResetSeconds` 는 `idleResetSeconds` 보다 길게, `countdownSeconds` 는 5~10초를 쓴다.
+
+### 헤더 「처음부터 다시」 버튼
+
+헤더 오른쪽에 「처음부터 다시」 버튼이 있다. 방문자가 잘못 적었을 때 무응답 리셋을 기다리지 않고 바로
+빈 서식으로 되돌린다. 실수 터치를 막으려고 **「입력한 내용이 지워집니다. 처음부터 다시 시작할까요?」 확인 화면**을
+한 번 거치고, 확인하면 작성 프레임을 통째로 새로 만든다(무응답 리셋과 같은 경로, 로그 사유 `reason=manual`).
+감사 화면에서는 되돌릴 것이 없으므로 버튼이 숨겨진다.
 
 ## 태블릿 키오스크 모드
 
