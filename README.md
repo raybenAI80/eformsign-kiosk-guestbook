@@ -133,6 +133,12 @@ URL 쿼리로 덮어쓸 수 있다: `?mode=thanks&sec=5&idle=120&abandon=180&tem
 - 공개 URL 이 외부에 노출되면 누구나 문서를 만들 수 있다. reCAPTCHA 를 켜고,
   필요하면 템플릿 시작 단계의 **문서 생성 수 제한** / **도메인·IP 지정** 을 함께 건다.
 - 방문자가 남긴 개인정보를 다루므로, 템플릿에 수집·이용 동의 항목을 반드시 둔다.
+- 🔴 **SDK(`eformsign-core`)를 고친 뒤에는 MCP 서버를 재연결한다.** MCP 는 빌드된 `dist` 를 기동 시
+  1회만 읽으므로, 재연결 전에는 새로 추가한 검사·필드(예: 관리자 보존 `toCreateShapeAuthFromForm`,
+  라디오 `label` 게이트, 삭제 memberId 메시지)가 MCP 툴에 **반영되지 않는다** — 옛 빌드로 검증하고
+  통과했다고 오판하기 쉽다. 순서: `cd eformsign-core && npm run build` → MCP 재연결 → 재검증.
+- 삭제·정리는 member-scoped 토큰이 필요하다(`.env` 의 `EFORMSIGN_DEFAULT_MEMBER_ID`). 성공 판정은
+  응답 코드가 아니라 **목록 재조회**, 순서는 **문서 → 템플릿**.
 
 ## 동작 원리
 
