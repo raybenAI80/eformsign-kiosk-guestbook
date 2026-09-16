@@ -392,6 +392,9 @@ OZR 3종은 2026-09-16 에 **실기로 재발급**했다(옛 v7 `b5053549…` �
 | `eformsign-render` | 현행 OZR 을 테스트 템플릿 `85a6d7ffb4c343caa829c0b0054acbb1`(`[TEST-ozr-receipt-20260916] …`)로 배포 후 공개 외부작성 URL 을 헤드리스 Chrome 으로 열기 | 작성화면에 8필드 전부 렌더 · 합성 클릭/타이핑 반영(제출 안 함) · OZR 기인 콘솔 에러 0 · 증거 `evidence/ozr-receipt-20260916/` |
 | `closeout-three-axis` | 위 둘이 PASS 한 뒤 `gate-receipt.mjs` | 지식화·스킬화·시스템화 3축 전부 실재 확인 |
 
+🔴 이 테스트 템플릿 `85a6d7ff…` 는 리시트 발급 직후 **2026-09-16 에 삭제했다**(연관 문서 0건). 재현이 필요하면
+`tools/deploy-guestbook.mjs --name "[TEST-…] …"` 로 새로 만든다. 발급 당시 증거는 `evidence/ozr-receipt-20260916/` 에 남아 있다.
+
 🔴 리시트는 산출물 sha256 에 바인딩된다. 서식을 다시 빌드하면 이 3종은 곧바로 무효가 되니
 GUI 게이트를 **실제로 다시 돌려** 재발급한다 — 실기 없이 발급하면 위조다.
 🔴 렌더 검증 함정 2가지: ① OZ 뷰어는 canvas 렌더러라 작성 iframe 의 DOM `input` 에 value 를
