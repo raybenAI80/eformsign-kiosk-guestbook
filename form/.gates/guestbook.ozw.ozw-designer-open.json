@@ -1,0 +1,8 @@
+{
+  "gate": "ozw-designer-open",
+  "verdict": "pass",
+  "artifact": "D:\\pjt\\eformsign\\kiosk-guestbook\\form\\guestbook.ozw",
+  "sha256": "f4d6d08233a79fb2c2b591a556889d9391a7136b7a642b94d1c6cfc55ba53cca",
+  "evidence": "2026-09-16 fresh 재관찰, 실제 Chrome(claude-in-chrome, rayben@forcs.com 로그인 세션). URL create_form.html?form_id=8844aae609b84078a59ef3118c64dab2&type=modify&menu=general -> 1 폼 디자인하기. (1) 배경 렌더: 디자인 PDF 전면 렌더 확인 - eformsign 로고, 블루 헤더 밴드, '방문자 기록부' 제목, '방문 정보' 섹션, 날짜/텍스트 입력칸 8개, '개인정보 수집·이용 동의' 박스. (2) 기계 프로브(iframe #contentFrame): __DesignerView__.m_pViewPageArray.length=1, __DesignerView__.m_pCompManager.m_nCompCount=8 (스펙 필드 8 == 컴포넌트 8). (3) 우측 패널 원문(iframe innerText): '추가된 입력 항목8 / 1 페이지 / 방문일시 / 방문자성명 / 소속 / 연락처 / 방문목적 / 담당자 / 개인정보동의 / 방문자서명'. (4) 방문 목적 라디오 zoom 캡처(region 430,550-900,600): '회의 납품 면접 견학 기타' 각 1회 - 회의 단일 표시, v8 의 '회의회의' 이중 인쇄 없음. (5) 콘솔 error/exception 0건(v9 초판의 mxLabel.getCheckBounds TypeError 재발 없음). 스크린샷 ID ss_0955i0h73 / ss_1681az4ij, zoom 이미지 세션 내 첨부(save_to_disk 미지원 응답).",
+  "at": "2026-09-15T07:49:24.115Z"
+}

@@ -1,0 +1,8 @@
+{
+  "gate": "kiosk-template-readiness",
+  "verdict": "pass",
+  "artifact": "D:\\pjt\\eformsign\\kiosk-guestbook\\form\\guestbook.ozw",
+  "sha256": "bc65752eae1655c15e5bc5e852d12601c77a740419559fd758a1dfe3c2c6036c",
+  "evidence": "MCP eformsign_verify_kiosk_template(9ee8126bcf4248a68d966a8b56759e6d) 2026-09-15: ok:true failed:[] warnings:[] — write>complete 2단계 · URL로 문서 생성 허용 ON · config.notification 키 4종/mail 7건 · display_settings 필드 8행+시스템 9행 · is_release true · 문서 관리자 rayben@forcs.com 1명 · 제목규칙 $$current_datetime$$_방문자 기록부(방명록)__{{방문자성명}}__{{소속}}",
+  "at": "2026-09-15T06:06:08.621Z"
+}

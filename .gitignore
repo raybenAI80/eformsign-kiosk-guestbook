@@ -25,3 +25,24 @@ form/*.ozw
 reports/
 .gates/
 qr/
+
+# ──────────────────────────────────────────────────────────────
+# 추적 예외 (2026-09-16)
+# 위 규칙의 의도는 "증거 이미지와 작업 산출물 제외"(초기 커밋 3093fb6)였지
+# 배포 산출물까지 빼려던 것이 아니다. 실제로는 운영 배포본과 게이트 입력이
+# 전부 무시되어 디스크에 유일 사본으로만 남아 있었다(유실 위험).
+# 아래 파일은 배포 산출물·게이트 입력·재빌드 결정성 기준선이므로 추적한다.
+# 모두 100KB 미만이라 저장소 비대 우려가 없다.
+# ──────────────────────────────────────────────────────────────
+!form/guestbook.ozr
+!form/guestbook.ozw
+!form/guestbook.pdf
+!form/guestbook.report.xml
+!form/guestbook.tail.xml
+!form/config-health.expect.json
+!form/config-health.json
+!form/build-stats.json
+!form/layout-audit.json
+!form/design/layout.design.json
+!form/.gates/
+!form/.gates/**/*.json

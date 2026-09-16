@@ -1,0 +1,22 @@
+{
+  "steps": [
+    {
+      "type": "write",
+      "accessibleAll": true,
+      "required": [
+        "방문일시",
+        "방문자성명",
+        "소속",
+        "연락처",
+        "담당자",
+        "방문목적",
+        "개인정보동의",
+        "방문자서명"
+      ]
+    },
+    {
+      "type": "complete"
+    }
+  ],
+  "inputs": "none"
+}

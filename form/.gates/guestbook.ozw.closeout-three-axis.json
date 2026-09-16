@@ -1,0 +1,29 @@
+{
+  "gate": "closeout-three-axis",
+  "verdict": "pass",
+  "artifact": "D:\\pjt\\eformsign\\kiosk-guestbook\\form\\guestbook.ozw",
+  "sha256": "f4d6d08233a79fb2c2b591a556889d9391a7136b7a642b94d1c6cfc55ba53cca",
+  "evidence": "2026-09-16 3축 감사(progress-3axis-audit-0916.md) 판정표 그대로. 지식화=ozr-ontology-pack claim:ozw-radio-label-must-match-item-count(라디오 label=빈 항목 n개) · eformsign-api-support-pack claim:noop-resave-wipes-document-manager(2026-09-16 도구 수정으로 해소) · claim:delete-apis-are-member-scoped-and-fail-before-the-network. 스킬화=eformsign-kiosk SKILL.md 함정 표 ⑲ 라디오 label / ⑳ 재저장 관리자 유실 / ㉑ 삭제 member-scoped. 시스템화=결함 주입 회귀 테스트 2종(ozw-radio-label 4케이스, create-shape-auth-managers 5케이스; npm test 173/173 PASS) + 게이트 라우터 gates.json R18-ozw-hand-emit 규칙.",
+  "at": "2026-09-15T08:02:05.924Z",
+  "threeAxis": {
+    "knowledge": [
+      "ozw-radio-label-must-match-item-count",
+      "noop-resave-wipes-document-manager",
+      "delete-apis-are-member-scoped-and-fail-before-the-network"
+    ],
+    "knowledgeNa": null,
+    "skill": [
+      {
+        "file": "C:/Users/FORCS/.claude/skills/eformsign-kiosk/SKILL.md",
+        "section": "⑥ 함정 표 (전부 2026-09-11 실기)"
+      }
+    ],
+    "skillNa": null,
+    "system": [
+      "D:/pjt/eformsign/eformsign-core/tests/ozw-radio-label.test.ts",
+      "D:/pjt/eformsign/eformsign-core/tests/create-shape-auth-managers.test.ts",
+      "C:/Users/FORCS/.agent-harness/gates/gates.json"
+    ],
+    "systemNa": null
+  }
+}
