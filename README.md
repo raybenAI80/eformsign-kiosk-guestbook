@@ -381,6 +381,16 @@ cmp -l <배포본>.ozw <재빌드>.ozw | wc -l   # 9
 | `form/guestbook.ozr` | `15053f90f2319593a9928a7ea52c022daf0abbc1a4d30a88b10f8156492a225f` | 75,491B |
 | `form/guestbook.ozw` | `f4d6d08233a79fb2c2b591a556889d9391a7136b7a642b94d1c6cfc55ba53cca` | 80,982B |
 
+🔴 **게이트 리시트는 OZW 계열만 현행이다.** `form/.gates/guestbook.ozw.*.json` 5종이 위 `f4d6d082…`
+에 묶여 있다. OZR 계열 리시트 3종(`guestbook.ozr.closeout-three-axis` · `designer-open-loaded` ·
+`eformsign-render`)은 **2026-09-11 v7 빌드(`b5053549…`) 기준**이라 현행 OZR `15053f90…` 에는
+무효다 — 2026-09-16 에 `form/.gates/stale-2026-09-11-v7/` 로 격리했다(삭제 아님, 이력 보존).
+현행 OZR 에 대한 리시트는 **미발급** 상태다. 필요하면 GUI 게이트를 실제로 돌려 재발급한다
+(실기 없이 발급하면 위조다).
+
+이 파일들은 2026-09-16 부터 저장소에서 추적한다 — `.gitignore` 의 `form/*.ozr|ozw|json|pdf|xml`
+규칙이 배포본까지 무시해 디스크에 유일 사본으로만 남아 있었기 때문이다(예외 절 참조).
+
 그리고 `config.js` 의 `templateId` 를 갱신한다. 구본은 **삭제하지 말고 개명**해 둔다.
 ⚠️ `createFromFile` 은 같은 이름이면 `400 [4000048] The connection name already exists` 로 거부한다.
 ⚠️ 이름만 바꿔 저장해도 `is_release` 가 내려가므로, 운영본을 개명했으면 재배포한다.
