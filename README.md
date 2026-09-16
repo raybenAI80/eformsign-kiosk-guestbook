@@ -356,8 +356,31 @@ node --env-file=D:/pjt/eformsign/eformsign-core/.env   D:/pjt/eformsign/form-fac
 node D:/pjt/eformsign/eformsign-cli/dist/cli.js ozw build-from-pdf form/guestbook.ozr -o form/guestbook.ozw   --required 방문일시 --required 방문자성명 --required 소속 --required 연락처   --required 방문목적 --required 담당자 --required 개인정보동의
 ```
 
-같은 입력이면 산출 바이트가 항상 같다(현행 고정점 sha256 `d06c9eff27a68346…`, 91,933B) — 재방출본이 배포본과
-byte-identical 인지로 회귀를 잡는다.
+### 재빌드 결정성 — 🔴 byte-identical 이 **아니다**(타임스탬프 9바이트)
+
+`build-ozr.mjs` 는 OZR 본문에 빌드 시각을 `<VERSION VERSION="7.0" DATE="<epoch ms>"/>` 로 찍는다.
+그래서 같은 입력으로 다시 돌려도 **OZR·OZW 모두 sha256 이 달라진다** — OZR→OZW 방출 자체는
+결정적이라 그 13자리 epoch 가 OZW 로 그대로 흘러들 뿐이다.
+
+2026-09-16 실측(정본 `form/` 에서 위 체인 재실행): 배포본 대비 **정확히 9바이트만** 다르고
+위치는 둘 다 오프셋 734–742(= `DATE` 값 13자리 중 바뀐 자리)였다.
+
+```
+cmp -l <배포본>.ozr <재빌드>.ozr | wc -l   # 9
+cmp -l <배포본>.ozw <재빌드>.ozw | wc -l   # 9
+# 734..742  "1789456343242" -> "1789545527823"
+```
+
+따라서 회귀 판정은 **sha 동일**이 아니라 **`cmp -l` 차이가 오프셋 734–742 의 9바이트뿐인가**로 한다.
+그 밖의 바이트가 하나라도 다르면 실제 회귀다.
+
+배포본 고정점(운영 템플릿 `8844aae6…` = OZW v9. 2026-09-15 게이트 리시트 3종이 이 sha 에 묶여 있다):
+
+| 파일 | sha256 | 크기 |
+|---|---|---|
+| `form/guestbook.ozr` | `15053f90f2319593a9928a7ea52c022daf0abbc1a4d30a88b10f8156492a225f` | 75,491B |
+| `form/guestbook.ozw` | `f4d6d08233a79fb2c2b591a556889d9391a7136b7a642b94d1c6cfc55ba53cca` | 80,982B |
+
 그리고 `config.js` 의 `templateId` 를 갱신한다. 구본은 **삭제하지 말고 개명**해 둔다.
 ⚠️ `createFromFile` 은 같은 이름이면 `400 [4000048] The connection name already exists` 로 거부한다.
 ⚠️ 이름만 바꿔 저장해도 `is_release` 가 내려가므로, 운영본을 개명했으면 재배포한다.
