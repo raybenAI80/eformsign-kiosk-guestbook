@@ -2,28 +2,30 @@
   "gate": "closeout-three-axis",
   "verdict": "pass",
   "artifact": "D:\\pjt\\eformsign\\kiosk-guestbook\\form\\guestbook.ozr",
-  "sha256": "b5053549a4ffa6b510c5e7521868237bd085baedfaf57a69971e1cb13503432e",
-  "evidence": "지식화=eformsign-api-support-pack claims.md 3 claim 추가 / 스킬화=nl-to-ozr form-quality-library.md 3.5 / 시스템화=SDK todayDefault 옵션 + 어포던스 캡처 프로브 2종 + config-health exit 0",
-  "at": "2026-09-11T05:41:35.780Z",
+  "sha256": "15053f90f2319593a9928a7ea52c022daf0abbc1a4d30a88b10f8156492a225f",
+  "evidence": "2026-09-16 현행 OZR(15053f90…) 리시트 재발급 마감. 선행 게이트 2종 PASS: designer-open-loaded(LOADED, workFolderPrompt=True, title='/guestbook.ozr - OZ e-Form Designer 9.0', exit 0) · eformsign-render(테스트 템플릿 85a6d7ffb4c343caa829c0b0054acbb1 작성화면 8필드 실렌더 + 합성 입력 반영, 제출 안 함, 운영 8844aae6 미접촉). 지식화=eformsign-api-support-pack claims.md claim:kiosk-guestbook-builder-canon-… 절에 재발급 결과 + 부정결과 2건 추기(① OZ 뷰어는 canvas 렌더러라 작성 iframe 의 DOM input 에 value 를 주입해도 안 그려진다 — CDP 합성 입력 필수 ② 작성화면의 'Seuckit NXS initialization has been failed' 는 PKI 플러그인 미설치라는 환경 사유이므로 콘솔에러 판정에서 제외). 스킬화=eformsign-kiosk SKILL.md ④ 검증 절차 · nl-to-ozr SKILL.md Non-negotiables(Designer open/compat 오라클 절) — 이번에 쓴 절차가 그대로 적혀 있어 갭 없음을 재확인. 시스템화=designer-open-oracle.ps1 -Receipt(sha 바인딩 리시트 자동 발급) · gate-receipt.mjs · deploy-guestbook.mjs(로컬 OZR→테스트 템플릿 1커맨드 배포)로 세 게이트 전부 재현 가능. 부수 정정: 이 두 claim 이 pack 관례(## claim:)와 달리 '### claim:' 로 적혀 있어 게이트 스캐너(^##\\s+claim:)에 안 걸렸다 — 헤딩 레벨을 ## 로 정규화했다.",
+  "at": "2026-09-16T08:29:01.234Z",
   "threeAxis": {
     "knowledge": [
-      "claim:ozr-input-control-type-is-visible-in-template-schema",
-      "claim:date-component-today-default-is-an-ozr-oninitialize-not-a-platform-setting",
-      "claim:createfromfile-rejects-duplicate-template-name"
+      "kiosk-guestbook-builder-canon-and-rebuild-determinism-2026-09-16",
+      "kiosk-probe-consent-gate-coords-2026-09-16"
     ],
     "knowledgeNa": null,
     "skill": [
       {
-        "file": "C:\\Users\\FORCS\\.claude\\skills\\nl-to-ozr\\references\\form-quality-library.md",
-        "section": "3.5 컴포넌트 감사 + 날짜 기본값 「오늘」 (PROVEN 2026-09-11)"
+        "file": "C:/Users/FORCS/.claude/skills/eformsign-kiosk/SKILL.md",
+        "section": "④ 검증 절차"
+      },
+      {
+        "file": "C:/Users/FORCS/.claude/skills/nl-to-ozr/SKILL.md",
+        "section": "Non-negotiables (read first)"
       }
     ],
     "skillNa": null,
     "system": [
-      "D:\\pjt\\eformsign\\eformsign-core\\src\\resources\\pdf-backed-ozr.ts",
-      "D:\\pjt\\eformsign\\kiosk-guestbook\\tools\\probe-components.mjs",
-      "D:\\pjt\\eformsign\\kiosk-guestbook\\tools\\probe-date.mjs",
-      "D:\\pjt\\eformsign\\form-factory\\scripts\\config-health.mjs"
+      "D:/pjt/eformsign/ozr-studio/tools/designer-safe/designer-open-oracle.ps1",
+      "C:/Users/FORCS/.agent-harness/gates/gate-receipt.mjs",
+      "D:/pjt/eformsign/kiosk-guestbook/tools/deploy-guestbook.mjs"
     ],
     "systemNa": null
   }

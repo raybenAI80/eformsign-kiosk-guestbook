@@ -1,0 +1,8 @@
+{
+  "gate": "external-writer-typing",
+  "verdict": "pass",
+  "artifact": "D:\\pjt\\eformsign\\kiosk-guestbook\\form\\guestbook.ozw",
+  "sha256": "f4d6d08233a79fb2c2b591a556889d9391a7136b7a642b94d1c6cfc55ba53cca",
+  "evidence": "2026-09-16 fresh 재관찰, 2경로 모두 PASS(제출 안 함). (A) 공개 URL 직접: 실제 Chrome(claude-in-chrome) 으로 external_user_view_service.html?company_id=7095eb0672c246378eeb86cc90e6e1bd&form_id=8844aae609b84078a59ef3118c64dab2&lang_code=ko&country_code=kr 열기 -> '전자문서 및 전자서명 사용에 동의합니다' 체크 -> 계속 -> 작성 화면 진입(상단 뷰어 툴바 표시, 입력칸 베이지 강조) -> 방문자 성명 칸 클릭 -> '영수증테스트' 타이핑 -> zoom 캡처(region 380,350-1060,430)에서 칸 안에 '영수증테스트' 표시 확인. 상단 제목 실시간 갱신 '2026-09-15 오후 04:49_방문자 기록부(방명록)____'. (B) 래퍼 키오스크 https://eformsign-kiosk-guestbook.vercel.app : 동일 절차 반복, 동의 체크 -> 계속 -> 작성 진입 -> 방문자 성명에 '영수증테스트' 입력, 스크린샷에서 칸 안 표시 확인. 래퍼 콘솔 로그로 임베딩 옵션 확인: mode.template_id=8844aae609b84078a59ef3118c64dab2, user.type=02(external), layout.hide_request_popup=true, '작성 프레임 진입(engaged)'. 🔴 환경 함정 기록: claude-in-chrome 탭이 백그라운드(document.visibilityState=hidden)가 되면 래퍼의 cross-origin iframe 으로 가는 합성 클릭이 무음 소실한다(체크박스 1회만 먹고 이후 계속/닫기 버튼 클릭 전부 무반응). 래퍼 경로는 chrome-devtools MCP(visible 페이지, a11y uid 로 iframe 내부 요소 직접 지정)로 재수행해 통과시켰다. 정적 선행: inspectTemplateOzw ok=true, warnings 0(report_input_participant_mask 없음).",
+  "at": "2026-09-15T08:01:43.587Z"
+}

@@ -1,0 +1,8 @@
+{
+  "gate": "eformsign-render",
+  "verdict": "pass",
+  "artifact": "D:\\pjt\\eformsign\\kiosk-guestbook\\form\\guestbook.ozr",
+  "sha256": "b5053549a4ffa6b510c5e7521868237bd085baedfaf57a69971e1cb13503432e",
+  "evidence": "템플릿 e1fef806750248d5993c2ecee84e9502 작성화면/완료PDF 실렌더 확인: evidence/final/date-02-editable-today.png(날짜 2026-09-11 자동입력) comp-01-date-calendar.png(달력 팝업) comp-04-check-agreed.png(라디오·체크) comp-06~08(서명패드) final-render-1.png(완료 PDF 8필드 전부 인쇄)",
+  "at": "2026-09-11T05:38:08.667Z"
+}

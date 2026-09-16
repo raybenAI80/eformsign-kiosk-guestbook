@@ -1,0 +1,8 @@
+{
+  "gate": "kiosk-repeat-loop",
+  "verdict": "pass",
+  "artifact": "D:\\pjt\\eformsign\\kiosk-guestbook\\form\\guestbook.ozw",
+  "sha256": "bc65752eae1655c15e5bc5e852d12601c77a740419559fd758a1dfe3c2c6036c",
+  "evidence": "2026-09-15 헤드리스 CDP 9233, v7 9ee8126b 운영 배포본(eformsign-kiosk-guestbook.vercel.app) 대상: verify-kiosk --mode immediate --rounds 2 → 문서 2건 서로 다른 id(54e34a36, 89df5489), --mode thanks --rounds 2 → 2건(ae7dbf56, 5d427e53). probe-idle-reset(localhost:8099) ALL_PASS=true case1/2/3 전부 true.",
+  "at": "2026-09-15T06:11:40.373Z"
+}

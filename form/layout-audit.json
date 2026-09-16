@@ -1,0 +1,28 @@
+{
+ "label": "방문자기록부",
+ "ozr": "D:\\pjt\\eformsign\\kiosk-guestbook\\form\\guestbook.ozr",
+ "pdf": "C:\\Users\\FORCS\\AppData\\Local\\Temp\\ozr-layout-audit-gSBpm9\\source.pdf",
+ "fieldsExpected": 8,
+ "placementsEmitted": 12,
+ "uniqueFormIds": 8,
+ "coverage": {
+  "missing": [],
+  "pass": true
+ },
+ "intrusion": {
+  "count": 0,
+  "items": [],
+  "pass": true
+ },
+ "intrusionWarn": {
+  "count": 0,
+  "items": [],
+  "rule": "signpad/check/radio/button은 투명 렌더 + 서식의 (인) 앵커 위에 놓이는 것이 정상이므로 WARN"
+ },
+ "greyRule": "span color channels all >= 0xA0 이면 회색 견본으로 보고 침범 대상에서 제외",
+ "drawnRectRule": "침범 판정은 원본 bbox가 아니라 실제 그려지는 rect(좌우 1.5pt inset), eps=0.3pt",
+ "failOn": [
+  "coverage",
+  "intrusion"
+ ]
+}

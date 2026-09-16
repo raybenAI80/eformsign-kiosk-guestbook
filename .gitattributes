@@ -1,0 +1,4 @@
+# 배포 산출물은 바이트 단위로 보존한다 (CRLF 변환 금지 — sha 고정점이 깨진다)
+*.ozr -text
+*.ozw -text
+*.pdf -text

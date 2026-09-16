@@ -1,0 +1,41 @@
+{
+ "stats": {
+  "pageCount": 1,
+  "fieldsExpected": 8,
+  "placements": 8,
+  "uniqueFormIds": 8,
+  "components": {
+   "textbox": 4,
+   "checkbox": 1,
+   "datepicker": 1,
+   "signpad": 1,
+   "radioGroups": 1
+  },
+  "pagesWithChildren": [
+   1
+  ],
+  "eventScriptsChecked": 2,
+  "xmlBytes": 18569
+ },
+ "coverage": {
+  "expected": 8,
+  "emitted": 8,
+  "missing": [],
+  "pass": true
+ },
+ "clipped": [],
+ "formIds": [
+  "개인정보동의",
+  "담당자",
+  "방문목적",
+  "방문일시",
+  "방문자서명",
+  "방문자성명",
+  "소속",
+  "연락처"
+ ],
+ "layoutAudit": {
+  "ran": true,
+  "status": 0
+ }
+}

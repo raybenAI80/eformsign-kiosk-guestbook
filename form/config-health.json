@@ -1,0 +1,66 @@
+{
+ "ok": true,
+ "formId": "0c05c0146e794db385ff1cd32c9bcf30",
+ "formName": "방문자 기록부(방명록)",
+ "isRelease": true,
+ "expectedFields": 8,
+ "expectSource": "D:/pjt/eformsign/kiosk-guestbook/form/config-health.expect.json",
+ "stepSignature": "1:시작/write | 2:완료/complete",
+ "stepIcoCounts": {
+  "write": 8
+ },
+ "stepAccessible": {
+  "write": [
+   "방문일시",
+   "방문자성명",
+   "소속",
+   "연락처",
+   "담당자",
+   "방문목적",
+   "개인정보동의",
+   "방문자서명"
+  ]
+ },
+ "stepRequired": {
+  "write": [
+   "개인정보동의",
+   "담당자",
+   "방문목적",
+   "방문일시",
+   "방문자서명",
+   "방문자성명",
+   "소속",
+   "연락처"
+  ]
+ },
+ "displayTotal": 17,
+ "displaySystemRows": 9,
+ "displayFieldRows": 8,
+ "defaultInputControls": 8,
+ "notificationKeys": [
+  "internal_recipient",
+  "external_recipient",
+  "processing_status",
+  "processing_request"
+ ],
+ "mailSendingPoints": 7,
+ "inputs": [],
+ "authFormMember": {
+  "members": [],
+  "groups": [],
+  "managers": null,
+  "externalUser": null,
+  "allow_all_members": false
+ },
+ "authFormModifyMember": {
+  "members": [],
+  "groups": [],
+  "managers": [],
+  "externalUser": null
+ },
+ "fails": [],
+ "notes": [],
+ "uiRenderVerified": false,
+ "uiRenderNote": "🔴 config GET 200 은 편집기 렌더 증거가 아니다. 워크플로우/필드설정 화면을 로그인 브라우저로 열어 확인하고 게이트 workflow-ui-render 리시트를 발급할 것.",
+ "releaseNote": "🔴 이 게이트는 작업본을 GET 한다. release 하지 않은 변경은 사용자 화면에 없다 — 문서 뷰어는 릴리스된 버전을 읽는다. 배포 파이프라인(deployTemplateFile)은 config 저장 → release 순서라 안전하지만, 배포 후 config 를 손으로 패치했다면 release 를 다시 호출할 것."
+}

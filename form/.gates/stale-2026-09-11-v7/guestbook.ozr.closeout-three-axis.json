@@ -1,0 +1,30 @@
+{
+  "gate": "closeout-three-axis",
+  "verdict": "pass",
+  "artifact": "D:\\pjt\\eformsign\\kiosk-guestbook\\form\\guestbook.ozr",
+  "sha256": "b5053549a4ffa6b510c5e7521868237bd085baedfaf57a69971e1cb13503432e",
+  "evidence": "지식화=eformsign-api-support-pack claims.md 3 claim 추가 / 스킬화=nl-to-ozr form-quality-library.md 3.5 / 시스템화=SDK todayDefault 옵션 + 어포던스 캡처 프로브 2종 + config-health exit 0",
+  "at": "2026-09-11T05:41:35.780Z",
+  "threeAxis": {
+    "knowledge": [
+      "claim:ozr-input-control-type-is-visible-in-template-schema",
+      "claim:date-component-today-default-is-an-ozr-oninitialize-not-a-platform-setting",
+      "claim:createfromfile-rejects-duplicate-template-name"
+    ],
+    "knowledgeNa": null,
+    "skill": [
+      {
+        "file": "C:\\Users\\FORCS\\.claude\\skills\\nl-to-ozr\\references\\form-quality-library.md",
+        "section": "3.5 컴포넌트 감사 + 날짜 기본값 「오늘」 (PROVEN 2026-09-11)"
+      }
+    ],
+    "skillNa": null,
+    "system": [
+      "D:\\pjt\\eformsign\\eformsign-core\\src\\resources\\pdf-backed-ozr.ts",
+      "D:\\pjt\\eformsign\\kiosk-guestbook\\tools\\probe-components.mjs",
+      "D:\\pjt\\eformsign\\kiosk-guestbook\\tools\\probe-date.mjs",
+      "D:\\pjt\\eformsign\\form-factory\\scripts\\config-health.mjs"
+    ],
+    "systemNa": null
+  }
+}

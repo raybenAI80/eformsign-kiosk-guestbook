@@ -1,0 +1,55 @@
+<OZFORM VERSION="1005">
+<OZINFO SCALE="1" SL="0" ST="0" SW="853" SH="1263"/>
+<OZMXCOMP>
+<root>
+<mxCell id="0"/>
+<mxCell id="1" parent="0"/>
+<OZICDATETIMEPICKER tooltip="날짜" formID="방문일시" defaultValue="" showTodayIfEmpty="false" format="date_yyyy-MM-dd" minDate="" maxDate="" inputNotice="" emptyAllowed="true" tooltipText="" participants_enables="3" participants_requireds="3" id="2">
+<mxCell style="text;overflow=hidden;fillColor=#FFFFFF;opacity=0;fontSize=12;fontStyle=0;verticalAlign=middle;align=left;rotatable=0;connectable=0;strokeColor=none;fontColor=#000000;shadow=1;fontFamily=본고딕;" vertex="1" parent="1">
+<mxGeometry x="216.333" y="240.667" width="146.667" height="20" as="geometry"/>
+</mxCell>
+</OZICDATETIMEPICKER>
+<OZICTEXTBOX tooltip="텍스트" formID="방문자성명" defaultValue="" showPasswordChar="false" valueMeaningCode="0" maxLength="0" autoFontSize="true" filterFormat="" keyboardType="default" inputNotice="" tooltipText="" participants_enables="3" participants_requireds="3" id="3">
+<mxCell style="text;overflow=hidden;fillColor=#FFFFFF;opacity=0;fontSize=12;fontStyle=0;verticalAlign=middle;align=left;rotatable=0;connectable=0;strokeColor=none;fontColor=#000000;shadow=1;fontFamily=본고딕;" vertex="1" parent="1">
+<mxGeometry x="216.333" y="301.987" width="340.653" height="20" as="geometry"/>
+</mxCell>
+</OZICTEXTBOX>
+<OZICTEXTBOX tooltip="텍스트" formID="소속" defaultValue="" showPasswordChar="false" valueMeaningCode="0" maxLength="0" autoFontSize="true" filterFormat="" keyboardType="default" inputNotice="" tooltipText="" participants_enables="3" participants_requireds="3" id="4">
+<mxCell style="text;overflow=hidden;fillColor=#FFFFFF;opacity=0;fontSize=12;fontStyle=0;verticalAlign=middle;align=left;rotatable=0;connectable=0;strokeColor=none;fontColor=#000000;shadow=1;fontFamily=본고딕;" vertex="1" parent="1">
+<mxGeometry x="216.333" y="363.333" width="505.027" height="20" as="geometry"/>
+</mxCell>
+</OZICTEXTBOX>
+<OZICTEXTBOX tooltip="텍스트" formID="연락처" defaultValue="" showPasswordChar="false" valueMeaningCode="0" maxLength="0" autoFontSize="true" filterFormat="" keyboardType="default" inputNotice="" tooltipText="" participants_enables="3" participants_requireds="3" id="5">
+<mxCell style="text;overflow=hidden;fillColor=#FFFFFF;opacity=0;fontSize=12;fontStyle=0;verticalAlign=middle;align=left;rotatable=0;connectable=0;strokeColor=none;fontColor=#000000;shadow=1;fontFamily=본고딕;" vertex="1" parent="1">
+<mxGeometry x="216.333" y="424.667" width="340.653" height="20" as="geometry"/>
+</mxCell>
+</OZICTEXTBOX>
+<OZICRADIOBUTTON tooltip="라디오" formID="방문목적" checked="false" label="&#10;&#10;&#10;&#10;" text_multivalue="회의&#10;납품&#10;면접&#10;견학&#10;기타" checkedValue="Y" radioStyle="radio" horizontalCheckAlignment="left" tooltipText="" participants_enables="3" participants_requireds="3" id="6">
+<mxCell style="text;checkStyle=radio;overflow=hidden;fillColor=#FFFFFF;opacity=0;fontSize=12;fontStyle=0;verticalAlign=middle;align=left;rotatable=0;connectable=0;strokeColor=none;fontColor=#000000;shadow=1;fontFamily=본고딕;" vertex="1" parent="1">
+<mxGeometry x="211.333" y="486.653" width="425.32" height="20" as="geometry"/>
+</mxCell>
+</OZICRADIOBUTTON>
+<OZICTEXTBOX tooltip="텍스트" formID="담당자" defaultValue="" showPasswordChar="false" valueMeaningCode="0" maxLength="0" autoFontSize="true" filterFormat="" keyboardType="default" inputNotice="" tooltipText="" participants_enables="3" participants_requireds="3" id="7">
+<mxCell style="text;overflow=hidden;fillColor=#FFFFFF;opacity=0;fontSize=12;fontStyle=0;verticalAlign=middle;align=left;rotatable=0;connectable=0;strokeColor=none;fontColor=#000000;shadow=1;fontFamily=본고딕;" vertex="1" parent="1">
+<mxGeometry x="216.333" y="547.333" width="340.653" height="20" as="geometry"/>
+</mxCell>
+</OZICTEXTBOX>
+<OZICCHECKRADIOBOX tooltip="체크" formID="개인정보동의" checked="false" label="" text_multivalue="" checkedValue="Y" radioStyle="check" multiSelectable="true" horizontalCheckAlignment="left" tooltipText="" participants_enables="3" participants_requireds="3" id="8">
+<mxCell style="text;checkStyle=check;overflow=hidden;fillColor=#FFFFFF;opacity=0;fontSize=12;fontStyle=0;verticalAlign=middle;align=left;rotatable=0;connectable=0;strokeColor=none;fontColor=#000000;shadow=1;fontFamily=본고딕;" vertex="1" parent="1">
+<mxGeometry x="98" y="773.333" width="20" height="20" as="geometry"/>
+</mxCell>
+</OZICCHECKRADIOBOX>
+<OZICSIGNPAD tooltip="서명" formID="방문자서명" valueMeaningCode="285279248" signPenThickness="1" signPenColor="#000000" showSignIcon="true" label="" signatureNotice_multivalue="" tooltipText="" inputNotice="" participants_enables="3" participants_requireds="1" id="9">
+<mxCell style="text;overflow=hidden;fillColor=#FFFFFF;opacity=0;fontSize=12;fontStyle=0;verticalAlign=middle;align=center;rotatable=0;connectable=0;strokeColor=none;fontColor=#000000;shadow=1;fontFamily=본고딕;" vertex="1" parent="1">
+<mxGeometry x="215.667" y="900.987" width="341.987" height="101.987" as="geometry"/>
+</mxCell>
+</OZICSIGNPAD>
+</root>
+</OZMXCOMP>
+<OZPAGEINFO TW="793" TH="1203">
+<OZPAGE POS_Y="30" X="0" Y="0" W="595" H="842" PDFDOC_IDX="0" PDFDOC_UID="1" PDFPAGE_IDX="0" PDFDOC_NAME="PDFDocument"/>
+</OZPAGEINFO>
+<OZPARTICIPANTS>
+<OZPARTICIPANT NAME="발송인"/>
+</OZPARTICIPANTS>
+</OZFORM>

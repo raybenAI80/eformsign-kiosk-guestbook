@@ -88,6 +88,37 @@ CASE 5(카운트다운 취소 후 재시작) 참조.
 
 ---
 
+### 7. 🔴 작성 화면이 뜨는 도중의 `iframe load` 를 제출로 오판하던 레이스 (2026-09-16 수정)
+
+외부 작성자(`user.type` `"02"`) 신규 작성에서는 제출해도 `success_callback` 이 오지 않는 경우가 있어,
+「작성 화면이 뜬 뒤(`action_callback`)의 iframe 이동」을 제출 보조 신호로 쓴다. 그런데 이폼사인이 보내는
+`func_onload` `action_callback`(postMessage)과 **같은 문서의 `load` 이벤트 사이에는 도착 순서 보장이 없다.**
+순서가 뒤집히면 `formReady` 가 켜진 채 그 문서 자신의 `load` 가 들어와 **아무도 제출하지 않았는데
+「제출 감지」** 가 찍히고 세션이 리셋된다. 문서는 만들어지지 않았으므로 방문 기록이 통째로 사라질 수 있다.
+
+실측(헤드리스, 2026-09-16, 운영 서식 `8844aae6…`):
+
+| 관측 항목 | 값 |
+|---|---|
+| `load`(작성 화면) ↔ `action_callback` 간격 | 0.5 ~ 1.3초 |
+| 두 신호의 순서 | 고정되지 않는다. `load` 가 먼저인 라운드와 `action_callback` 이 먼저인 라운드가 섞였다(먼저인 경우 +689ms · +924ms · +1,315ms 관측) |
+| 작성 프레임의 이동 주소 | 초기 로드 내내 `external_user_view_service.html?…` 하나 |
+| 세션당 `load` 횟수 | 2회 — #1 은 iframe 을 만든 직후의 `about:blank`(+5ms), #2 가 작성 화면 문서 |
+
+마지막 두 줄이 중요하다. **프레임이 이동한 주소로는 구분할 수 없다.** 다른 도메인이라 읽을 수 없을 뿐
+아니라, 초기 로드 동안 주소가 바뀌지도 않는다. 그래서 시간과 접촉 여부로 두 겹을 두었다.
+
+1. **작성 화면이 뜬 뒤 5초(`SUBMIT_GRACE_MS`) 안에 온 `load` 는 무시한다.** 방문자가 칸을 채우고
+   전송을 눌러 완료 화면까지 가는 데 5초 미만일 수는 없다. 관측된 레이스 폭(최대 1.3초)의 약 4배다.
+2. **작성 프레임을 한 번도 건드리지 않은 세션은 제출일 수 없다.** 전송 버튼이 그 프레임 안에 있기
+   때문이다. 다만 포커스 감지가 듣지 않는 환경에서 제출을 영영 못 잡는 일이 없도록
+   60초(`ENGAGE_FALLBACK_MS`)가 지나면 이 조건은 푼다.
+
+회귀 테스트는 `tools/probe-load-race.mjs` 다. `--inject <ms>` 가 결함 조건(작성 화면의 `load` 보다
+`action_callback` 이 먼저 도착한 상태)을 결정적으로 재현하므로, 네트워크 운에 기대지 않고 확인할 수 있다.
+
+---
+
 
 ## 설치·실행
 
@@ -325,8 +356,55 @@ node --env-file=D:/pjt/eformsign/eformsign-core/.env   D:/pjt/eformsign/form-fac
 node D:/pjt/eformsign/eformsign-cli/dist/cli.js ozw build-from-pdf form/guestbook.ozr -o form/guestbook.ozw   --required 방문일시 --required 방문자성명 --required 소속 --required 연락처   --required 방문목적 --required 담당자 --required 개인정보동의
 ```
 
-같은 입력이면 산출 바이트가 항상 같다(현행 고정점 sha256 `d06c9eff27a68346…`, 91,933B) — 재방출본이 배포본과
-byte-identical 인지로 회귀를 잡는다.
+### 재빌드 결정성 — 🔴 byte-identical 이 **아니다**(타임스탬프 9바이트)
+
+`build-ozr.mjs` 는 OZR 본문에 빌드 시각을 `<VERSION VERSION="7.0" DATE="<epoch ms>"/>` 로 찍는다.
+그래서 같은 입력으로 다시 돌려도 **OZR·OZW 모두 sha256 이 달라진다** — OZR→OZW 방출 자체는
+결정적이라 그 13자리 epoch 가 OZW 로 그대로 흘러들 뿐이다.
+
+2026-09-16 실측(정본 `form/` 에서 위 체인 재실행): 배포본 대비 **정확히 9바이트만** 다르고
+위치는 둘 다 오프셋 734–742(= `DATE` 값 13자리 중 바뀐 자리)였다.
+
+```
+cmp -l <배포본>.ozr <재빌드>.ozr | wc -l   # 9
+cmp -l <배포본>.ozw <재빌드>.ozw | wc -l   # 9
+# 734..742  "1789456343242" -> "1789545527823"
+```
+
+따라서 회귀 판정은 **sha 동일**이 아니라 **`cmp -l` 차이가 오프셋 734–742 의 9바이트뿐인가**로 한다.
+그 밖의 바이트가 하나라도 다르면 실제 회귀다.
+
+배포본 고정점(운영 템플릿 `8844aae6…` = OZW v9. 2026-09-15 게이트 리시트 3종이 이 sha 에 묶여 있다):
+
+| 파일 | sha256 | 크기 |
+|---|---|---|
+| `form/guestbook.ozr` | `15053f90f2319593a9928a7ea52c022daf0abbc1a4d30a88b10f8156492a225f` | 75,491B |
+| `form/guestbook.ozw` | `f4d6d08233a79fb2c2b591a556889d9391a7136b7a642b94d1c6cfc55ba53cca` | 80,982B |
+
+✅ **게이트 리시트는 OZR·OZW 두 계열 모두 현행이다.** `form/.gates/guestbook.ozw.*.json` 5종이
+위 `f4d6d082…` 에, `form/.gates/guestbook.ozr.*.json` 3종이 위 `15053f90…` 에 묶여 있다.
+OZR 3종은 2026-09-16 에 **실기로 재발급**했다(옛 v7 `b5053549…` 기준 리시트는 무효라
+`form/.gates/stale-2026-09-11-v7/` 에 격리해 뒀다 — 삭제 아님, 이력 보존):
+
+| 게이트 | 실행 | 관찰 |
+|---|---|---|
+| `designer-open-loaded` | `pwsh -File D:\pjt\eformsign\ozr-studio	ools\designer-safe\designer-open-oracle.ps1 -Paths <이 저장소>orm\guestbook.ozr -WaitSeconds 45 -Receipt` | LOADED · 작업폴더 모달 자동 확인 · title `/guestbook.ozr - OZ e-Form Designer 9.0` · exit 0 |
+| `eformsign-render` | 현행 OZR 을 테스트 템플릿 `85a6d7ffb4c343caa829c0b0054acbb1`(`[TEST-ozr-receipt-20260916] …`)로 배포 후 공개 외부작성 URL 을 헤드리스 Chrome 으로 열기 | 작성화면에 8필드 전부 렌더 · 합성 클릭/타이핑 반영(제출 안 함) · OZR 기인 콘솔 에러 0 · 증거 `evidence/ozr-receipt-20260916/` |
+| `closeout-three-axis` | 위 둘이 PASS 한 뒤 `gate-receipt.mjs` | 지식화·스킬화·시스템화 3축 전부 실재 확인 |
+
+🔴 이 테스트 템플릿 `85a6d7ff…` 는 리시트 발급 직후 **2026-09-16 에 삭제했다**(연관 문서 0건). 재현이 필요하면
+`tools/deploy-guestbook.mjs --name "[TEST-…] …"` 로 새로 만든다. 발급 당시 증거는 `evidence/ozr-receipt-20260916/` 에 남아 있다.
+
+🔴 리시트는 산출물 sha256 에 바인딩된다. 서식을 다시 빌드하면 이 3종은 곧바로 무효가 되니
+GUI 게이트를 **실제로 다시 돌려** 재발급한다 — 실기 없이 발급하면 위조다.
+🔴 렌더 검증 함정 2가지: ① OZ 뷰어는 canvas 렌더러라 작성 iframe 의 DOM `input` 에 value 를
+주입해도 화면에 안 그려진다(CDP 합성 입력을 써야 한다) ② 작성화면은 항상
+`Seuckit NXS initialization has been failed`(공인인증 플러그인 미설치) 에러를 1건 내는데
+환경 사유이지 서식 결함이 아니다.
+
+이 파일들은 2026-09-16 부터 저장소에서 추적한다 — `.gitignore` 의 `form/*.ozr|ozw|json|pdf|xml`
+규칙이 배포본까지 무시해 디스크에 유일 사본으로만 남아 있었기 때문이다(예외 절 참조).
+
 그리고 `config.js` 의 `templateId` 를 갱신한다. 구본은 **삭제하지 말고 개명**해 둔다.
 ⚠️ `createFromFile` 은 같은 이름이면 `400 [4000048] The connection name already exists` 로 거부한다.
 ⚠️ 이름만 바꿔 저장해도 `is_release` 가 내려가므로, 운영본을 개명했으면 재배포한다.
@@ -468,6 +546,7 @@ esearch\ozw-template-api-creation-feasibility-2026-09-11.md`.
 | `probe-sign-send.mjs` / `probe-sign2.mjs` | 서명 패드 열기 → 그리기 → 확인 → 전송 |
 | `probe-recaptcha.mjs` | reCAPTCHA ON 상태의 전송 팝업 캡처(체크하지 않는다) |
 | `designer-observe.mjs` | 🔴 **웹폼 디자이너 로드 관찰기**(CDP, 로그인된 실제 Chrome). `create_form.html?form_id=<id>&type=modify` 를 열어 네트워크 전수·콘솔·예외·전역 프로브를 JSON 으로 저장한다. 판정은 화면이 아니라 수치로: `__DesignerView__.m_pViewPageArray.length>=1` · `__DesignerFrame__.m_pCompManager.m_nCompCount==필드수`. 게이트 `ozw-designer-open` 의 증거 수집기 |
+| `probe-load-race.mjs` | 🔴 「작성 화면이 뜨는 도중의 `iframe load` 를 제출로 오판」 회귀. 아무 입력 없이 열어 두고 `onSubmitted` 가 한 번이라도 찍히면 실패. `--inject <ms>` 로 결함 조건을 결정적으로 재현한다(수정 전 판 3/3 FAIL · 수정판 3/3 PASS 로 대조 확인). 정적 서버를 스스로 띄운다 |
 | `probe-idle-reset.mjs` | 무응답 리셋 5케이스 실기 검증(프레임 포커스 유지 40초 무리셋 / 카운트다운→리셋 / 터치 취소 / 🔴 포커스 유지한 채 이탈해도 abandon 리셋이 오는지[2026-09-16] / 카운트다운 취소 후 타이머 재시작). `evidence/final/idle-*.png` + `idle-cases-report.json` 생성, 전부 PASS 면 exit 0 |
 
 검증용 헤드리스 크롬 띄우기:
@@ -483,6 +562,14 @@ node tools/verify-kiosk.mjs --port 9233 --mode thanks    --rounds 2 --notype
 
 ```bash
 CDP_PORT=9233 node tools/probe-idle-reset.mjs   # ALL_PASS=true / exit 0
+```
+
+제출 오탐 레이스 회귀(같은 헤드리스 크롬, 대조군 10회 약 4분):
+
+```bash
+Q="company=<회사 ID>&template=<서식 ID>"
+node tools/probe-load-race.mjs --root . --port 8112 --cdp 9233 --query "$Q" --rounds 10   # 대조군: FALSE_POSITIVE=0
+node tools/probe-load-race.mjs --root . --port 8112 --cdp 9233 --query "$Q" --rounds 3 --inject 400   # 결함 조건 재현
 ```
 
 좌표는 768×1024 태블릿 뷰포트 기준이라 템플릿이 바뀌면 다시 잡아야 한다.
