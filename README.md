@@ -88,6 +88,37 @@ CASE 5(카운트다운 취소 후 재시작) 참조.
 
 ---
 
+### 7. 🔴 작성 화면이 뜨는 도중의 `iframe load` 를 제출로 오판하던 레이스 (2026-09-16 수정)
+
+외부 작성자(`user.type` `"02"`) 신규 작성에서는 제출해도 `success_callback` 이 오지 않는 경우가 있어,
+「작성 화면이 뜬 뒤(`action_callback`)의 iframe 이동」을 제출 보조 신호로 쓴다. 그런데 이폼사인이 보내는
+`func_onload` `action_callback`(postMessage)과 **같은 문서의 `load` 이벤트 사이에는 도착 순서 보장이 없다.**
+순서가 뒤집히면 `formReady` 가 켜진 채 그 문서 자신의 `load` 가 들어와 **아무도 제출하지 않았는데
+「제출 감지」** 가 찍히고 세션이 리셋된다. 문서는 만들어지지 않았으므로 방문 기록이 통째로 사라질 수 있다.
+
+실측(헤드리스, 2026-09-16, 운영 서식 `8844aae6…`):
+
+| 관측 항목 | 값 |
+|---|---|
+| `load`(작성 화면) ↔ `action_callback` 간격 | 0.5 ~ 1.3초 |
+| 두 신호의 순서 | 고정되지 않는다. `load` 가 먼저인 라운드와 `action_callback` 이 먼저인 라운드가 섞였다(먼저인 경우 +689ms · +924ms · +1,315ms 관측) |
+| 작성 프레임의 이동 주소 | 초기 로드 내내 `external_user_view_service.html?…` 하나 |
+| 세션당 `load` 횟수 | 2회 — #1 은 iframe 을 만든 직후의 `about:blank`(+5ms), #2 가 작성 화면 문서 |
+
+마지막 두 줄이 중요하다. **프레임이 이동한 주소로는 구분할 수 없다.** 다른 도메인이라 읽을 수 없을 뿐
+아니라, 초기 로드 동안 주소가 바뀌지도 않는다. 그래서 시간과 접촉 여부로 두 겹을 두었다.
+
+1. **작성 화면이 뜬 뒤 5초(`SUBMIT_GRACE_MS`) 안에 온 `load` 는 무시한다.** 방문자가 칸을 채우고
+   전송을 눌러 완료 화면까지 가는 데 5초 미만일 수는 없다. 관측된 레이스 폭(최대 1.3초)의 약 4배다.
+2. **작성 프레임을 한 번도 건드리지 않은 세션은 제출일 수 없다.** 전송 버튼이 그 프레임 안에 있기
+   때문이다. 다만 포커스 감지가 듣지 않는 환경에서 제출을 영영 못 잡는 일이 없도록
+   60초(`ENGAGE_FALLBACK_MS`)가 지나면 이 조건은 푼다.
+
+회귀 테스트는 `tools/probe-load-race.mjs` 다. `--inject <ms>` 가 결함 조건(작성 화면의 `load` 보다
+`action_callback` 이 먼저 도착한 상태)을 결정적으로 재현하므로, 네트워크 운에 기대지 않고 확인할 수 있다.
+
+---
+
 
 ## 설치·실행
 
@@ -468,6 +499,7 @@ esearch\ozw-template-api-creation-feasibility-2026-09-11.md`.
 | `probe-sign-send.mjs` / `probe-sign2.mjs` | 서명 패드 열기 → 그리기 → 확인 → 전송 |
 | `probe-recaptcha.mjs` | reCAPTCHA ON 상태의 전송 팝업 캡처(체크하지 않는다) |
 | `designer-observe.mjs` | 🔴 **웹폼 디자이너 로드 관찰기**(CDP, 로그인된 실제 Chrome). `create_form.html?form_id=<id>&type=modify` 를 열어 네트워크 전수·콘솔·예외·전역 프로브를 JSON 으로 저장한다. 판정은 화면이 아니라 수치로: `__DesignerView__.m_pViewPageArray.length>=1` · `__DesignerFrame__.m_pCompManager.m_nCompCount==필드수`. 게이트 `ozw-designer-open` 의 증거 수집기 |
+| `probe-load-race.mjs` | 🔴 「작성 화면이 뜨는 도중의 `iframe load` 를 제출로 오판」 회귀. 아무 입력 없이 열어 두고 `onSubmitted` 가 한 번이라도 찍히면 실패. `--inject <ms>` 로 결함 조건을 결정적으로 재현한다(수정 전 판 3/3 FAIL · 수정판 3/3 PASS 로 대조 확인). 정적 서버를 스스로 띄운다 |
 | `probe-idle-reset.mjs` | 무응답 리셋 5케이스 실기 검증(프레임 포커스 유지 40초 무리셋 / 카운트다운→리셋 / 터치 취소 / 🔴 포커스 유지한 채 이탈해도 abandon 리셋이 오는지[2026-09-16] / 카운트다운 취소 후 타이머 재시작). `evidence/final/idle-*.png` + `idle-cases-report.json` 생성, 전부 PASS 면 exit 0 |
 
 검증용 헤드리스 크롬 띄우기:
@@ -483,6 +515,14 @@ node tools/verify-kiosk.mjs --port 9233 --mode thanks    --rounds 2 --notype
 
 ```bash
 CDP_PORT=9233 node tools/probe-idle-reset.mjs   # ALL_PASS=true / exit 0
+```
+
+제출 오탐 레이스 회귀(같은 헤드리스 크롬, 대조군 10회 약 4분):
+
+```bash
+Q="company=<회사 ID>&template=<서식 ID>"
+node tools/probe-load-race.mjs --root . --port 8112 --cdp 9233 --query "$Q" --rounds 10   # 대조군: FALSE_POSITIVE=0
+node tools/probe-load-race.mjs --root . --port 8112 --cdp 9233 --query "$Q" --rounds 3 --inject 400   # 결함 조건 재현
 ```
 
 좌표는 768×1024 태블릿 뷰포트 기준이라 템플릿이 바뀌면 다시 잡아야 한다.

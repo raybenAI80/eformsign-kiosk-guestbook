@@ -250,7 +250,7 @@
   }
 
   // ---------- 상태 ----------
-  var state = { session: 0, phase: 'boot', docs: [], formReady: false, loads: 0, submits: 0 };
+  var state = { session: 0, phase: 'boot', docs: [], formReady: false, formReadyAt: 0, loads: 0, submits: 0 };
   window.__kioskState = state;
 
   function show(which) {
@@ -431,6 +431,32 @@
     return opt;
   }
 
+  // 🔴 2026-09-16 레이스 차단 — 「로드 중 iframe load」를 제출로 오판하던 결함.
+  //    작성 화면이 뜨면 이폼사인이 func_onload(action_callback)를 보내는데, 이 메시지는
+  //    같은 문서의 iframe load 이벤트보다 **먼저 도착할 수 있다**(두 신호 사이에 순서 보장이 없다).
+  //    그러면 formReady 가 켜진 채 그 문서 자신의 load 가 들어와 「제출 후 이동」으로 오판됐다.
+  //    실측(헤드리스, 2026-09-16): 두 신호 간격 0.5~1.3초, 순서는 라운드마다 뒤집혔다.
+  //    작성 프레임은 다른 도메인이라 이동한 주소를 읽어 구분할 수 없다 → 아래 두 겹으로 막는다.
+  //      · 1차 = 작성 화면이 뜬 뒤 SUBMIT_GRACE_MS 안에 온 load 는 무시한다.
+  //        방문자가 칸을 채우고 전송을 눌러 완료 화면까지 가는 데 5초 미만일 수는 없다.
+  //      · 2차 = 작성 프레임을 한 번도 건드리지 않은 세션은 제출일 수 없다(전송 버튼이 그 안에 있다).
+  //        포커스 감지가 듣지 않는 환경에서 제출을 영영 못 잡는 일이 없도록
+  //        ENGAGE_FALLBACK_MS 가 지나면 이 조건은 푼다(그때쯤의 load 는 초기 로드일 수 없다).
+  var SUBMIT_GRACE_MS = 5000;
+  var ENGAGE_FALLBACK_MS = 60000;
+  function looksLikeSubmitNavigation() {
+    var since = Date.now() - (state.formReadyAt || 0);
+    if (since < SUBMIT_GRACE_MS) {
+      log('제출 아님 — 작성 화면이 뜬 지 ' + since + 'ms 만의 load (로드 레이스 차단)');
+      return false;
+    }
+    if (!idle.engaged && since < ENGAGE_FALLBACK_MS) {
+      log('제출 아님 — 작성 프레임을 건드린 적이 없다 (' + since + 'ms)');
+      return false;
+    }
+    return true;
+  }
+
   // 세션마다 iframe 을 통째로 새로 만든다 → 직전 방문자의 입력값·뷰어 상태가 남지 않는다.
   function clearFrame() {
     els.host.innerHTML = '';
@@ -441,13 +467,14 @@
     // action_callback 이 오지 않는 경우에도 화면이 멈추지 않도록 load 를 보조 신호로 쓴다
     f.addEventListener('load', function () {
       state.loads += 1;
-      log('iframe load #' + state.loads + (state.formReady ? ' (작성 화면 이후)' : ''));
+      log('iframe load #' + state.loads +
+        (state.formReady ? ' (작성 화면 이후 ' + (Date.now() - (state.formReadyAt || 0)) + 'ms)' : ''));
       if (state.phase === 'loading') show(null);
       armIdle('iframe-load');
       // 🔴 외부 작성자(user.type "02") 신규 작성에서는 제출해도 success_callback 이 오지 않는다.
       //    제출하면 iframe 이 스스로 이폼사인의 제출 완료 안내 화면으로 이동한다 →
       //    "작성 화면 로드(action_callback) 이후의 iframe 이동" 을 제출 신호로 쓴다.
-      if (state.formReady && state.phase === 'form') {
+      if (state.formReady && state.phase === 'form' && looksLikeSubmitNavigation()) {
         state.formReady = false;
         log('제출 감지(iframe 이동)');
         setTimeout(function () { onSubmitted({ via: 'iframe-navigation' }); }, 300);
@@ -459,6 +486,7 @@
   function startSession(reason) {
     var my = ++state.session;
     state.formReady = false;
+    state.formReadyAt = 0;
     log('startSession#' + my + ' reason=' + reason + ' mode=' + C.mode);
     show('loading');
     clearFrame();
@@ -490,6 +518,7 @@
     log('action_callback', res && (res.data || res));
     if (state.phase === 'loading') show(null);
     state.formReady = true;     // 작성 화면이 떴다 = 이후의 iframe 이동은 제출로 본다
+    state.formReadyAt = Date.now();   // 이 시각 직후의 load 는 작성 화면 자신의 load 다(위 레이스 차단)
     armIdle('action_callback');
   }
 
