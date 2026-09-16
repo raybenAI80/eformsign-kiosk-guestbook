@@ -73,10 +73,18 @@ OZR 복사 재배포(`redeployOzr`) 로 API 에서 만든 템플릿은 `notifica
 3. **부모 영역의 pointer / touch / key / wheel**.
 
 그리고 리셋 기준을 둘로 나눈다. 아직 프레임을 건드리지 않은 세션은 `idleResetSeconds`(기본 120초),
-한 번이라도 포커스가 갔던 세션은 `abandonResetSeconds`(기본 180초)를 쓰고 **포커스가 프레임 밖에 있는 시간만** 센다.
+한 번이라도 포커스가 갔던 세션은 `abandonResetSeconds`(기본 180초)를 쓴다.
 리셋 `countdownSeconds` 초 전(기본 5초)에는 "계속 작성하시겠습니까?" 복귀 카운트다운이 뜨고, 그동안 뒤의 작성 내용은 흐리게 가려진다. 아무 곳이나 터치하면 취소된다.
 리셋이 실제로 일어나면 콘솔에 사유·한도·경과·마지막 활동 출처가 남는다
 (`무응답 리셋 실행 — 사유=abandon 한도=180s 경과=181s 마지막 활동 출처=frame-focus`).
+
+🔴 **2026-09-16 수정 — 포커스가 프레임 안에 "머무는" 동안도 abandon 타이머는 흐른다.**
+이전 판은 "포커스가 프레임 안에 있으면 매초 타이머를 되감는다"로 짜여 있어서, 칸에 글을 쓰다
+그대로 자리를 뜬 방문자는 **영원히 리셋되지 않는** 결함이 있었다(포커스가 프레임 밖으로 안 나갔으므로).
+지금은 포커스가 프레임 안으로 **"들어간 순간"만** 활동 1회로 치고(`idle.inFrame` 플래그,
+`noteFrameFocus()`), 그 뒤로 프레임 안에 머무는 동안에도 `abandonResetSeconds` 가 그대로 흘러
+시간이 되면 리셋된다. 회귀 테스트는 `probe-idle-reset.mjs` CASE 4(포커스 유지한 채 이탈)/
+CASE 5(카운트다운 취소 후 재시작) 참조.
 
 ---
 
@@ -123,7 +131,7 @@ URL 쿼리로 덮어쓸 수 있다: `?mode=thanks&sec=5&idle=120&abandon=180&cou
 | 설정 키 | 뜻 | 기본값 | URL 쿼리 |
 |---|---|---|---|
 | `idleResetSeconds` | 아직 아무도 작성 프레임을 건드리지 않은 빈 화면을 처음 화면으로 되돌리기까지의 시간(초). `0` 이면 리셋 전체를 끔 | `120` | `?idle=` |
-| `abandonResetSeconds` | 방문자가 작성을 시작한 뒤 자리를 뜬 경우의 리셋 시간(초). 포커스가 작성 프레임 밖에 있는 시간만 센다 | `180` | `?abandon=` |
+| `abandonResetSeconds` | 방문자가 작성을 시작한 뒤 자리를 뜬 경우의 리셋 시간(초). 프레임 안에 포커스가 머무는 동안에도 흐른다(2026-09-16 수정 — 위 「6.」 참조) | `180` | `?abandon=` |
 | `thanksSeconds` | 제출 후 감사 화면을 보여 주는 시간(초). `mode: 'thanks'` 일 때만 쓰인다 | `5` | `?sec=` |
 | `countdownSeconds` | 리셋 직전 「계속 작성하시겠습니까?」 복귀 카운트다운 시간(초) | `5` | `?countdown=` |
 
@@ -460,7 +468,7 @@ esearch\ozw-template-api-creation-feasibility-2026-09-11.md`.
 | `probe-sign-send.mjs` / `probe-sign2.mjs` | 서명 패드 열기 → 그리기 → 확인 → 전송 |
 | `probe-recaptcha.mjs` | reCAPTCHA ON 상태의 전송 팝업 캡처(체크하지 않는다) |
 | `designer-observe.mjs` | 🔴 **웹폼 디자이너 로드 관찰기**(CDP, 로그인된 실제 Chrome). `create_form.html?form_id=<id>&type=modify` 를 열어 네트워크 전수·콘솔·예외·전역 프로브를 JSON 으로 저장한다. 판정은 화면이 아니라 수치로: `__DesignerView__.m_pViewPageArray.length>=1` · `__DesignerFrame__.m_pCompManager.m_nCompCount==필드수`. 게이트 `ozw-designer-open` 의 증거 수집기 |
-| `probe-idle-reset.mjs` | 무응답 리셋 3케이스 실기 검증(프레임 포커스 유지 40초 무리셋 / 카운트다운→리셋 / 터치 취소). `evidence/final/idle-*.png` + `idle-cases-report.json` 생성, 전부 PASS 면 exit 0 |
+| `probe-idle-reset.mjs` | 무응답 리셋 5케이스 실기 검증(프레임 포커스 유지 40초 무리셋 / 카운트다운→리셋 / 터치 취소 / 🔴 포커스 유지한 채 이탈해도 abandon 리셋이 오는지[2026-09-16] / 카운트다운 취소 후 타이머 재시작). `evidence/final/idle-*.png` + `idle-cases-report.json` 생성, 전부 PASS 면 exit 0 |
 
 검증용 헤드리스 크롬 띄우기:
 
