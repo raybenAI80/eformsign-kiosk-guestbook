@@ -1,0 +1,8 @@
+{
+  "gate": "eformsign-render",
+  "verdict": "pass",
+  "artifact": "D:\\pjt\\eformsign\\kiosk-guestbook\\form\\guestbook.ozr",
+  "sha256": "15053f90f2319593a9928a7ea52c022daf0abbc1a4d30a88b10f8156492a225f",
+  "evidence": "2026-09-16 실기. 현행 OZR(15053f90…)을 새 테스트 템플릿 [TEST-ozr-receipt-20260916] 방문자 기록부 = 85a6d7ffb4c343caa829c0b0054acbb1 로 배포(deploy-guestbook.mjs, createFromFile→2단계 write/complete→release, external_users ON/reCAPTCHA OFF). 운영 8844aae6 미접촉. 헤드리스 Chrome(전용 포트 9252, --user-data-dir=<스크래치>/chrome-profile, 1000x1300)으로 공개 외부작성 URL external_user_view_service.html?company_id=7095eb0672c246378eeb86cc90e6e1bd&form_id=85a6d7ff… 열기 → 동의 게이트(체크박스 1 + 계속) 통과 → 작성화면 진입(view_iframe_pc.html, OZ 뷰어 런타임 totoOZViewer/OZEFormInputEventCommand 확인). 렌더 증거 D:/pjt/eformsign/kiosk-guestbook/evidence/ozr-receipt-20260916/render-02-writer.png = 서식 8필드 전부 인쇄: 방문일시(2026-09-16 자동입력)·방문자성명·소속·연락처·방문목적(라디오 5)·만나는담당자·개인정보동의(체크+고지문)·방문자서명(서명패드). 템플릿 스키마 컨트롤 8개 일치(DateTimePicker/InputTextEx x4/InputRadioGroup/InputCheckbox/SignPad, write_step 8개 전부 accessible+required). 상호작용 증거 render-04-interact.png = CDP 합성 클릭·insertText 로 방문자성명='영수증테스트', 방문목적 '회의' 라디오 선택, 개인정보동의 체크 반영(제출 안 함). 콘솔: OZR 기인 에러 0. 유일한 error 는 'Seuckit NXS initialization has been failed'(공인인증 PKI 플러그인 미설치 = 헤드리스 환경 사유, OZR 무관). 스크린샷 4종 = render-00-landing/01-consent/02-writer/04-interact.png",
+  "at": "2026-09-16T08:26:51.751Z"
+}

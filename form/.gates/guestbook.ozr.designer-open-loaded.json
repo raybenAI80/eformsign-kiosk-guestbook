@@ -1,0 +1,8 @@
+{
+  "gate": "designer-open-loaded",
+  "verdict": "pass",
+  "artifact": "D:\\pjt\\eformsign\\kiosk-guestbook\\form\\guestbook.ozr",
+  "sha256": "15053f90f2319593a9928a7ea52c022daf0abbc1a4d30a88b10f8156492a225f",
+  "evidence": "designer-open-oracle: LOADED; workFolderPrompt=True; title='/guestbook.ozr - OZ e-Form Designer 9.0'",
+  "at": "2026-09-16T08:23:02.458Z"
+}

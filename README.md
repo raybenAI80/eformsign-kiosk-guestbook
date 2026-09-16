@@ -381,12 +381,23 @@ cmp -l <배포본>.ozw <재빌드>.ozw | wc -l   # 9
 | `form/guestbook.ozr` | `15053f90f2319593a9928a7ea52c022daf0abbc1a4d30a88b10f8156492a225f` | 75,491B |
 | `form/guestbook.ozw` | `f4d6d08233a79fb2c2b591a556889d9391a7136b7a642b94d1c6cfc55ba53cca` | 80,982B |
 
-🔴 **게이트 리시트는 OZW 계열만 현행이다.** `form/.gates/guestbook.ozw.*.json` 5종이 위 `f4d6d082…`
-에 묶여 있다. OZR 계열 리시트 3종(`guestbook.ozr.closeout-three-axis` · `designer-open-loaded` ·
-`eformsign-render`)은 **2026-09-11 v7 빌드(`b5053549…`) 기준**이라 현행 OZR `15053f90…` 에는
-무효다 — 2026-09-16 에 `form/.gates/stale-2026-09-11-v7/` 로 격리했다(삭제 아님, 이력 보존).
-현행 OZR 에 대한 리시트는 **미발급** 상태다. 필요하면 GUI 게이트를 실제로 돌려 재발급한다
-(실기 없이 발급하면 위조다).
+✅ **게이트 리시트는 OZR·OZW 두 계열 모두 현행이다.** `form/.gates/guestbook.ozw.*.json` 5종이
+위 `f4d6d082…` 에, `form/.gates/guestbook.ozr.*.json` 3종이 위 `15053f90…` 에 묶여 있다.
+OZR 3종은 2026-09-16 에 **실기로 재발급**했다(옛 v7 `b5053549…` 기준 리시트는 무효라
+`form/.gates/stale-2026-09-11-v7/` 에 격리해 뒀다 — 삭제 아님, 이력 보존):
+
+| 게이트 | 실행 | 관찰 |
+|---|---|---|
+| `designer-open-loaded` | `pwsh -File D:\pjt\eformsign\ozr-studio	ools\designer-safe\designer-open-oracle.ps1 -Paths <이 저장소>orm\guestbook.ozr -WaitSeconds 45 -Receipt` | LOADED · 작업폴더 모달 자동 확인 · title `/guestbook.ozr - OZ e-Form Designer 9.0` · exit 0 |
+| `eformsign-render` | 현행 OZR 을 테스트 템플릿 `85a6d7ffb4c343caa829c0b0054acbb1`(`[TEST-ozr-receipt-20260916] …`)로 배포 후 공개 외부작성 URL 을 헤드리스 Chrome 으로 열기 | 작성화면에 8필드 전부 렌더 · 합성 클릭/타이핑 반영(제출 안 함) · OZR 기인 콘솔 에러 0 · 증거 `evidence/ozr-receipt-20260916/` |
+| `closeout-three-axis` | 위 둘이 PASS 한 뒤 `gate-receipt.mjs` | 지식화·스킬화·시스템화 3축 전부 실재 확인 |
+
+🔴 리시트는 산출물 sha256 에 바인딩된다. 서식을 다시 빌드하면 이 3종은 곧바로 무효가 되니
+GUI 게이트를 **실제로 다시 돌려** 재발급한다 — 실기 없이 발급하면 위조다.
+🔴 렌더 검증 함정 2가지: ① OZ 뷰어는 canvas 렌더러라 작성 iframe 의 DOM `input` 에 value 를
+주입해도 화면에 안 그려진다(CDP 합성 입력을 써야 한다) ② 작성화면은 항상
+`Seuckit NXS initialization has been failed`(공인인증 플러그인 미설치) 에러를 1건 내는데
+환경 사유이지 서식 결함이 아니다.
 
 이 파일들은 2026-09-16 부터 저장소에서 추적한다 — `.gitignore` 의 `form/*.ozr|ozw|json|pdf|xml`
 규칙이 배포본까지 무시해 디스크에 유일 사본으로만 남아 있었기 때문이다(예외 절 참조).
